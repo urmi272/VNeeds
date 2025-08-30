@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VNeeds</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Landing Page -->
+  <div id="landing" class="page active">
+    <div class="logo">VNeeds</div>
+    <h1>Welcome to VNeeds</h1>
+    <p>Turn your hostel needs into quick deals - anytime, anywhere.</p>
+    <div class="options">
+      <button onclick="openBuy()">Buy</button>
+      <button onclick="openSell()">Sell</button>
+    </div>
+  </div>
+
+  <!-- Login/Register Page -->
+  <div id="auth" class="page">
+    <h2>Login / Register</h2>
+    <input type="email" id="email" placeholder="Enter your college email">
+    <button onclick="login()">Continue</button>
+    <p id="error"></p>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard" class="page">
+    <header>
+  <div class="logo">VNeeds</div>
+  <input type="text" id="search" placeholder="Search products..." onkeyup="filterProducts()">
+
+  <div class="nav-actions">
+    <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+    <button onclick="showPage('sellForm')">+ Sell</button>
+    <button onclick="showPage('wishlistPage')">❤️ Wishlist</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+    </header>
+
+<aside>
+  <h3>Categories</h3>
+  <ul>
+    <li onclick="filterCategory('all')">All</li>
+    <li onclick="filterCategory('food')">Food</li>
+    <li onclick="filterCategory('clothes')">Clothes</li>
+    <li onclick="filterCategory('cosmetics')">Cosmetics</li>
+  </ul>
+
+  <h3>Price</h3>
+  <input type="range" id="priceRange" min="0" max="500" step="10" oninput="filterByPrice()">
+  <span id="priceValue">500</span>
+</aside>
+
+    <!-- overlay for mobile -->
+    <div id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+
+    <main id="productList">
+      <!-- Products dynamically inserted here -->
+    </main>
+  </div>
+
+  <!-- Wishlist Page -->
+  <div id="wishlistPage" class="page">
+    <header>
+      <div class="logo">VNeeds</div>
+      <div>
+        <button onclick="showPage('dashboard')">⬅ Back</button>
+        <button onclick="logout()">Logout</button>
+      </div>
+    </header>
+    <h2>Your Wishlist ❤️</h2>
+    <div id="wishlistList" class="wishlist-container"></div>
+  </div>
+
+  <!-- Sell Form -->
+  <div id="sellForm" class="page">
+    <h2>Sell a Product</h2>
+    <input type="text" id="productName" placeholder="Product Name"><br>
+    <input type="number" id="productPrice" placeholder="Price (₹)"><br>
+    <select id="productCategory">
+      <option value="food">Food</option>
+      <option value="clothes">Clothes</option>
+      <option value="cosmetics">Cosmetics</option>
+    </select><br>
+    <textarea id="productDescription" placeholder="Product Description"></textarea><br>
+    <input type="file" id="productImage" accept="image/*" onchange="previewImage(event)"><br>
+    <img id="imagePreview" style="display:none; max-width:200px; margin:10px auto; border-radius:8px;"><br>
+    <button onclick="addProduct()">Add Product</button>
+    <button onclick="showPage('dashboard')">Cancel</button>
+  </div>
+
+  <!-- Product Details Modal -->
+  <div id="productModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <img id="modalImg">
+      <h3 id="modalName"></h3>
+      <p id="modalPrice"></p>
+      <p id="modalDesc"></p>
+      <p id="modalSeller"></p>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

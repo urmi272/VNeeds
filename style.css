@@ -1,0 +1,230 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #fefefe;
+}
+
+.page { display: none; text-align: center; padding: 20px; }
+.page.active { display: block; }
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #000000;
+  margin-bottom: 20px;
+}
+
+.options button {
+  margin: 10px;
+  padding: 15px 30px;
+  font-size: 18px;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  background: #4ca8af;
+  color: white;
+  transition: 0.3s;
+}
+.options button:hover { background: #b4b4f7; }
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #4ca8af;
+  color: white;
+  padding: 10px 20px;
+}
+header input {
+  width: 50%;
+  padding: 8px;
+  border-radius: 6px;
+  border: none;
+}
+
+aside {
+  float: left;
+  width: 20%;
+  background: #fff;
+  padding: 20px;
+  border-right: 1px solid #ddd;
+  min-height: 90vh;
+}
+main {
+  margin-left: 22%;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.product {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  text-align: left;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.product:hover { transform: scale(1.03); }
+
+.product img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.wishlist {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  font-size: 20px;
+  color: gray;
+}
+.wishlist.active { color: red; }
+
+#sellForm input, #sellForm select, #sellForm textarea {
+  margin: 10px;
+  padding: 10px;
+  width: 250px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+#sellForm textarea { height: 60px; resize: none; }
+
+#sellForm button {
+  margin: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #4CAF50;
+  color: white;
+  cursor: pointer;
+}
+#sellForm button:hover { background: #45a049; }
+
+.wishlist-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 10;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+}
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 400px;
+  text-align: center;
+  position: relative;
+}
+.modal-content img {
+  max-width: 100%;
+  border-radius: 8px;
+}
+.close {
+  position: absolute;
+  top: 10px; right: 15px;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* Responsive Layout */
+@media (max-width: 768px) {
+  aside {
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 200px;
+    height: 100%;
+    background: #fff;
+    box-shadow: 2px 0 6px rgba(0,0,0,0.2);
+    transition: left 0.3s ease;
+    z-index: 20;
+  }
+  aside.active {
+    left: 0;
+  }
+
+  main {
+    margin-left: 0;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  header {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  header input {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .mobile-toggle {
+    display: inline-block;
+    background: transparent;
+    border: none;
+    font-size: 22px;
+    color: white;
+    cursor: pointer;
+    margin-right: 8px;
+  }
+
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-toggle {
+    display: none;
+  }
+}
+
+/* Sidebar overlay */
+#sidebarOverlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4);
+  z-index: 15;
+}
+
+/* Mobile sidebar behavior */
+@media (max-width: 768px) {
+  aside {
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 200px;
+    height: 100%;
+    background: #fff;
+    box-shadow: 2px 0 6px rgba(0,0,0,0.2);
+    transition: left 0.3s ease;
+    z-index: 20;
+  }
+  aside.active {
+    left: 0;
+  }
+  aside.active + #sidebarOverlay {
+    display: block;
+  }
+}
