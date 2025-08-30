@@ -5,11 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VNeeds</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <!-- Landing Page -->
   <div id="landing" class="page active">
-    <div class="logo">VNeeds</div>
+    <div class="logo">V<span style="color:var(--color2)">Needs</span></div>
     <h1>Welcome to VNeeds</h1>
     <p>Turn your hostel needs into quick deals - anytime, anywhere.</p>
     <div class="options">
@@ -20,8 +23,10 @@
 
   <!-- Login/Register Page -->
   <div id="auth" class="page">
+    <div class="logo">V<span style="color:var(--color2)">Needs</span></div>
     <h2>Login / Register</h2>
-    <input type="email" id="email" placeholder="Enter your college email">
+    <label for="email">College Email</label><br>
+    <input type="email" id="email" placeholder="Enter your college email"><br>
     <button onclick="login()">Continue</button>
     <p id="error"></p>
   </div>
@@ -29,34 +34,32 @@
   <!-- Dashboard -->
   <div id="dashboard" class="page">
     <header>
-  <div class="logo">VNeeds</div>
-  <input type="text" id="search" placeholder="Search products..." onkeyup="filterProducts()">
-
-  <div class="nav-actions">
-    <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
-    <button onclick="showPage('sellForm')">+ Sell</button>
-    <button onclick="showPage('wishlistPage')">❤️ Wishlist</button>
-    <button onclick="logout()">Logout</button>
-  </div>
+      <div class="logo">V<span style="color:var(--color2)">Needs</span></div>
+      <input type="text" id="search" placeholder="Search products..." onkeyup="filterProducts()">
+      <div class="nav-actions">
+        <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+        <button onclick="showPage('sellForm')">+ Sell</button>
+        <button onclick="showPage('wishlistPage')">❤️ Wishlist</button>
+        <button id="darkToggle" onclick="toggleDarkMode()">🌙</button>
+        <button onclick="logout()">Logout</button>
+      </div>
     </header>
 
-<aside>
-  <h3>Categories</h3>
-  <ul>
-    <li onclick="filterCategory('all')">All</li>
-    <li onclick="filterCategory('food')">Food</li>
-    <li onclick="filterCategory('clothes')">Clothes</li>
-    <li onclick="filterCategory('cosmetics')">Cosmetics</li>
-  </ul>
+    <aside>
+      <h3>Categories</h3>
+      <ul>
+        <li onclick="filterCategory('all')">All</li>
+        <li onclick="filterCategory('food')">🍜 Food</li>
+        <li onclick="filterCategory('clothes')">👕 Clothes</li>
+        <li onclick="filterCategory('cosmetics')">💄 Cosmetics</li>
+      </ul>
 
-  <h3>Price</h3>
-  <input type="range" id="priceRange" min="0" max="500" step="10" oninput="filterByPrice()">
-  <span id="priceValue">500</span>
-</aside>
+      <h3>Price</h3>
+      <input type="range" id="priceRange" min="0" max="500" step="10" oninput="filterByPrice()">
+      <span id="priceValue">500</span>
+    </aside>
 
-    <!-- overlay for mobile -->
     <div id="sidebarOverlay" onclick="closeSidebar()"></div>
-
 
     <main id="productList">
       <!-- Products dynamically inserted here -->
@@ -66,7 +69,7 @@
   <!-- Wishlist Page -->
   <div id="wishlistPage" class="page">
     <header>
-      <div class="logo">VNeeds</div>
+      <div class="logo">V<span style="color:var(--color2)">Needs</span></div>
       <div>
         <button onclick="showPage('dashboard')">⬅ Back</button>
         <button onclick="logout()">Logout</button>
@@ -74,23 +77,39 @@
     </header>
     <h2>Your Wishlist ❤️</h2>
     <div id="wishlistList" class="wishlist-container"></div>
+    <div id="wishlistEmpty" style="display:none; margin-top:20px;">
+      <p>✨ No items yet. Start exploring products!</p>
+    </div>
   </div>
 
   <!-- Sell Form -->
   <div id="sellForm" class="page">
+    <div class="logo">V<span style="color:var(--color2)">Needs</span></div>
     <h2>Sell a Product</h2>
-    <input type="text" id="productName" placeholder="Product Name"><br>
-    <input type="number" id="productPrice" placeholder="Price (₹)"><br>
-    <select id="productCategory">
-      <option value="food">Food</option>
-      <option value="clothes">Clothes</option>
-      <option value="cosmetics">Cosmetics</option>
-    </select><br>
-    <textarea id="productDescription" placeholder="Product Description"></textarea><br>
-    <input type="file" id="productImage" accept="image/*" onchange="previewImage(event)"><br>
-    <img id="imagePreview" style="display:none; max-width:200px; margin:10px auto; border-radius:8px;"><br>
-    <button onclick="addProduct()">Add Product</button>
-    <button onclick="showPage('dashboard')">Cancel</button>
+    <form onsubmit="event.preventDefault(); addProduct();">
+      <label for="productName">Product Name</label><br>
+      <input type="text" id="productName" placeholder="Product Name"><br>
+
+      <label for="productPrice">Price (₹)</label><br>
+      <input type="number" id="productPrice" placeholder="Price (₹)"><br>
+
+      <label for="productCategory">Category</label><br>
+      <select id="productCategory">
+        <option value="food">Food</option>
+        <option value="clothes">Clothes</option>
+        <option value="cosmetics">Cosmetics</option>
+      </select><br>
+
+      <label for="productDescription">Description</label><br>
+      <textarea id="productDescription" placeholder="Product Description"></textarea><br>
+
+      <label for="productImage">Upload Image</label><br>
+      <input type="file" id="productImage" accept="image/*" onchange="previewImage(event)"><br>
+      <img id="imagePreview" style="display:none; max-width:200px; margin:10px auto; border-radius:8px;"><br>
+
+      <button type="submit">Add Product</button>
+      <button type="button" onclick="showPage('dashboard')">Cancel</button>
+    </form>
   </div>
 
   <!-- Product Details Modal -->
@@ -102,8 +121,12 @@
       <p id="modalPrice"></p>
       <p id="modalDesc"></p>
       <p id="modalSeller"></p>
+      <button onclick="showToast('📩 Contact Seller feature coming soon!')">📩 Contact Seller</button>
     </div>
   </div>
+
+  <!-- Toast Notification -->
+  <div id="toastContainer"></div>
 
   <script src="script.js"></script>
 </body>
