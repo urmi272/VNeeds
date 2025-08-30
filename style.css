@@ -1,5 +1,3 @@
-/* Modernized UI/UX with animations, micro-interactions, and new color palette */
-
 :root {
   --color1: #333446; /* primary */
   --color2: #7F8CAA; /* accent */
@@ -43,17 +41,35 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* logo layout + theming */
 .logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-size: 28px;
   font-weight: 700;
-  color: var(--accent);
-  margin-bottom: 20px;
-  letter-spacing: 1px;
-  transition: transform 0.3s ease;
+  color: var(--accent);           /* light mode stroke color */
 }
+body.dark .logo {
+  color: var(--color4);           /* dark mode stroke color (light) */
+}
+
+/* keep “Needs” accent consistent across modes */
+.logo span { color: var(--color2); }
+
+/* icon sizing */
+.logo-mark {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+}
+
+/* the “V/check” uses your accent color from the palette */
+.logo-mark .accent { fill: var(--color2); }
+
 .logo:hover {
   transform: scale(1.05);
-}
+} 
 
 .options button {
   margin: 10px;
