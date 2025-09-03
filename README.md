@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./banner.png" alt="VNeeds Banner"/>
+  <img src="./banner2.png" alt="VNeeds Banner"/>
 </p>
 
 # 🌐 VNeeds – Turn your hostel needs into quick deals, anytime, anywhere 🚀  
