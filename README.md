@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./banner.png" alt="VNeeds Banner"/>
+</p>
+
 # 🌐 VNeeds – Turn your hostel needs into quick deals, anytime, anywhere 🚀  
 
 > A student-to-student marketplace built to make hostel life simpler – buy, sell, and find essentials in seconds.  
