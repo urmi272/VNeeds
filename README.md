@@ -40,3 +40,22 @@ So we built **VNeeds** – a clean, student-focused marketplace to:
 | Landing Page | Dashboard | Sell Form |
 |--------------|-----------|-----------|
 | ![Landing](./screenshots/landing.png) | ![Dashboard](./screenshots/dashboard.png) | ![Sell Form](./screenshots/)
+
+---
+
+## 📌 Roadmap
+- 🔐 **Firebase Authentication** (college email login)  
+- ☁️ **Cloud Database (Firestore)** for multi-user marketplace  
+- 🖼️ **Image Uploads via Firebase Storage**  
+- 💬 **In-app Chat between buyer & seller**  
+- 🏷️ **More categories & advanced filters**  
+
+---
+
+## 🤝 Credits
+Built with ❤️ by:  
+- [Urmi Barman](https://github.com/urmi272)  
+- [Anjali Sevkani](https://github.com/anjalisevkani)  
+
+
+If you like this project, don’t forget to **⭐ star the repo**!
