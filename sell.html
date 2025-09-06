@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VNeeds - Sell</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Sell Form -->
+  <div id="sellForm" class="page active">
+    <div class="logo"><span style="color:var(--color2)">VNeeds</span></div>
+    <h2>Sell a Product</h2>
+    <form onsubmit="event.preventDefault(); addProduct();">
+      <label for="productName">Product Name</label><br>
+      <input type="text" id="productName" placeholder="Product Name"><br>
+
+      <label for="productPrice">Price (₹)</label><br>
+      <input type="number" id="productPrice" placeholder="Price (₹)"><br>
+
+      <label for="productCategory">Category</label><br>
+      <select id="productCategory">
+        <option value="food">Food</option>
+        <option value="clothes">Clothes</option>
+        <option value="cosmetics">Cosmetics</option>
+      </select><br>
+
+      <label for="productDescription">Description</label><br>
+      <textarea id="productDescription" placeholder="Product Description"></textarea><br>
+
+      <label for="productImage">Upload Image</label><br>
+      <input type="file" id="productImage" accept="image/*" onchange="previewImage(event)"><br>
+      <img id="imagePreview" style="display:none; max-width:200px; margin:10px auto; border-radius:8px;"><br>
+
+      <label for="sellerBlock">Your Block</label><br>
+        <select id="sellerBlock">
+        <option value="">-- Select Block --</option>
+        <optgroup label="Girls">
+            <option value="Girls Block 1">Girls Block 1</option>
+            <option value="Girls Block 2">Girls Block 2</option>
+            <option value="Girls Special Block">Girls Special Block</option>
+        </optgroup>
+        <optgroup label="Boys">
+            <option value="Boys Block 1">Boys Block 1</option>
+            <option value="Boys Block 2">Boys Block 2</option>
+            <option value="Boys Block 3">Boys Block 3</option>
+            <option value="Boys Block 4">Boys Block 4</option>
+            <option value="Boys Block 5">Boys Block 5</option>
+            <option value="Boys Block 6">Boys Block 6</option>
+            <option value="Boys Block 7">Boys Block 7</option>
+            <option value="Boys Block 8">Boys Block 8</option>
+        </optgroup>
+        </select><br>
+
+      <button type="submit">Add Product</button>
+      <a href="buy.html"><button type="button">Cancel</button></a>
+    </form>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastContainer"></div>
+
+  <script src="script.js"></script>
+  <script>
+    // Dark mode persistence
+    window.onload = () => {
+      if (localStorage.getItem("darkMode") === "true") {
+        document.body.classList.add("dark");
+      }
+    }
+  </script>
+</body>
+</html>
