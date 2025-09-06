@@ -335,3 +335,24 @@ main {
   header input { width: 100%; margin-top: 10px; }
   .wishlist-container { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
 }
+
+/* Mobile buttons full width */
+@media (max-width: 600px) {
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .options a {
+    width: 100%;
+  }
+
+  .options button {
+    width: 100%;
+    font-size: 18px;
+    padding: 16px;
+  }
+}

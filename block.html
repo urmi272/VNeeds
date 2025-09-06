@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Select Block - VNeeds</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page active" style="text-align:center; margin-top:60px;">
+    <div class="logo"><span style="color:var(--color2)">VNeeds</span></div>
+    <h2>Select Your Block</h2>
+    <select id="blockSelect" style="padding:12px; border-radius:8px; font-size:16px;">
+      <option value="">-- Select Block --</option>
+      <optgroup label="Girls">
+        <option value="Girls Block 1">Girls Block 1</option>
+        <option value="Girls Block 2">Girls Block 2</option>
+        <option value="Girls Special Block">Girls Special Block</option>
+      </optgroup>
+      <optgroup label="Boys">
+        <option value="Boys Block 1">Boys Block 1</option>
+        <option value="Boys Block 2">Boys Block 2</option>
+        <option value="Boys Block 3">Boys Block 3</option>
+        <option value="Boys Block 4">Boys Block 4</option>
+        <option value="Boys Block 5">Boys Block 5</option>
+        <option value="Boys Block 6">Boys Block 6</option>
+        <option value="Boys Block 7">Boys Block 7</option>
+        <option value="Boys Block 8">Boys Block 8</option>
+      </optgroup>
+    </select><br><br>
+    <button onclick="saveBlock()" style="padding:12px 24px; border:none; border-radius:10px; background:var(--accent); color:#fff; font-weight:600;">Continue</button>
+  </div>
+
+  <script>
+    function saveBlock(){
+      let block = document.getElementById("blockSelect").value;
+      if(!block){
+        alert("⚠ Please select your block!");
+        return;
+      }
+      localStorage.setItem("userBlock", block);
+      window.location.href = "buy.html";
+    }
+  </script>
+</body>
+</html>

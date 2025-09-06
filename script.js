@@ -129,9 +129,10 @@ function addProduct() {
   let desc = document.getElementById("productDescription").value.trim();
   let imgFile = document.getElementById("productImage").files[0];
   let seller = localStorage.getItem("user") || "Anonymous";
+  let sellerBlock = document.getElementById("sellerBlock").value;
 
-  if(!name || !price || !category || !desc || !imgFile) {
-    showToast("⚠ Please fill all fields and select an image");
+  if(!name || !price || !category || !desc || !imgFile || !sellerBlock) {
+    showToast("⚠ Please fill all fields and select an image + block");
     return;
   }
 
@@ -144,17 +145,19 @@ function addProduct() {
       category,
       desc,
       img: e.target.result,
-      seller
+      seller,
+      block: sellerBlock
     };
     products.push(newProduct);
     localStorage.setItem("products", JSON.stringify(products));
     loadProducts(products);
     clearForm();
     showToast("✅ Product added successfully!");
-    showPage("dashboard");
+    window.location.href = "buy.html";
   };
   reader.readAsDataURL(imgFile);
 }
+
 function clearForm() {
   document.getElementById("productName").value = "";
   document.getElementById("productPrice").value = "";
@@ -170,9 +173,10 @@ function openModal(p) {
   document.getElementById("modalName").innerText = p.name;
   document.getElementById("modalPrice").innerText = "₹" + p.price;
   document.getElementById("modalDesc").innerText = p.desc;
-  document.getElementById("modalSeller").innerText = "Seller: " + p.seller;
+  document.getElementById("modalSeller").innerText = "Seller: " + p.seller + (p.block ? " | Block: " + p.block : "");
   document.getElementById("productModal").style.display = "flex";
 }
+
 function closeModal() {
   document.getElementById("productModal").style.display = "none";
 }
@@ -209,4 +213,31 @@ function showToast(message) {
   setTimeout(() => { toast.classList.add("show"); }, 100);
   setTimeout(() => { toast.classList.remove("show"); }, 2500);
   setTimeout(() => { toast.remove(); }, 3000);
+}
+
+window.onload = () => {
+  if (localStorage.getItem("darkMode") === "true") {
+    document.body.classList.add("dark");
+  }
+
+  let userBlock = localStorage.getItem("userBlock");
+
+  // Insert user's block in sidebar
+  if(userBlock){
+    document.getElementById("blockCategory").innerHTML = `<li onclick="filterByBlock('${userBlock}')">🏢 ${userBlock}</li>`;
+    // Auto-load products from their block first
+    let blockProducts = products.filter(p => p.block === userBlock);
+    if(blockProducts.length > 0){
+      loadProducts(blockProducts);
+    } else {
+      loadProducts(products); // fallback if no products in their block
+    }
+  } else {
+    loadProducts(products);
+  }
+};
+
+function filterByBlock(block) {
+  loadProducts(products.filter(p=>p.block===block));
+  if (window.innerWidth <= 768) closeSidebar();
 }
