@@ -17,6 +17,11 @@ body.dark {
   --card-bg: #2a2a2a;
   --accent: var(--color2);
 }
+.logo-img {
+  height: 250px;
+  width: auto;
+}
+
 
 body {
   margin: 0;
@@ -25,6 +30,15 @@ body {
   color: var(--text);
   transition: background 0.3s, color 0.3s;
 }
+#landing {
+  background: url('bg.png') no-repeat center center/cover;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 
 .page {
   display: none;
