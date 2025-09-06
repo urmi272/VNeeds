@@ -397,6 +397,40 @@ aside {
 
 /* Mobile sidebar: hidden off-screen by default */
 @media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  header .nav-actions {
+    order: -1; /* move above everything */
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  header .logo {
+    order: 2; /* push logo below */
+    display: flex;
+    justify-content: center;
+  }
+
+  header input {
+    order: 3; /* push search last */
+    width: 100%;
+    margin-top: 5px;
+  }
+
+  header .nav-actions button {
+    flex: 1 1 auto;
+    min-width: 70px;
+  }
+  header .search-container {
+    width: 100%;
+    max-width: none;
+  }
   aside {
     position: fixed;
     top: 0;
@@ -434,6 +468,7 @@ aside {
     width: 100%;
     margin-top: 10px;
   }
+  
 }
 
 /* Mobile buttons full width */
@@ -443,7 +478,7 @@ aside {
     gap: 12px;
     padding: 10px;
   }
-
+  
   .options {
     display: flex;
     flex-direction: column;
@@ -467,7 +502,7 @@ aside {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #ff6b6b;
+  background: #beaaaa;
   border: none;
   color: white;
   font-size: 20px;
@@ -481,7 +516,7 @@ aside {
 }
 
 .close-btn:hover {
-  background: #e04a4a;
+  background: #d5b3b3;
   transform: scale(1.1);
 }
 
@@ -524,9 +559,9 @@ aside {
   top: 12px;
   right: 12px;
   z-index: 30;
-  background: #ff6b6b;
+  background: #EAEFEF;
   border: none;
-  color: white;
+  color: rgb(0, 0, 0);
   font-size: 18px;
   font-weight: bold;
   border-radius: 50%;
@@ -541,7 +576,7 @@ aside {
 }
 
 .close-btn:hover {
-  background: #e04a4a;
+  background: #B8CFCE;
   transform: scale(1.08);
 }
 
@@ -565,4 +600,46 @@ aside {
 .toast.show {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Search Bar with Icon */
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 50%;
+  max-width: 500px;
+}
+
+.search-container .search-icon {
+  position: absolute;
+  left: 12px;
+  font-size: 16px;
+  color: var(--text);
+  pointer-events: none; /* icon won't block typing */
+}
+
+.search-container input {
+  width: 100%;
+  padding: 10px 12px 10px 36px; /* extra left padding for icon */
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background: var(--color3);
+  transition: box-shadow 0.3s, background 0.3s;
+}
+
+.search-container input:focus {
+  box-shadow: 0 0 6px var(--color2);
+  background: white;
+}
+
+/* Dark mode tweaks */
+body.dark .search-container .search-icon {
+  color: #ccc;
+}
+
+body.dark .search-container input {
+  background: #333;
+  color: #eee;
 }
