@@ -60,18 +60,28 @@
     </div>
   </div>
 
-  <!-- Product Details Modal -->
-  <div id="productModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal()">&times;</span>
-      <img id="modalImg">
-      <h3 id="modalName"></h3>
-      <p id="modalPrice"></p>
-      <p id="modalDesc"></p>
-      <p id="modalSeller"></p>
-      <button onclick="showToast('📩 Contact Seller feature coming soon!')">📩 Contact Seller</button>
+<!-- Product Details Modal -->
+<div id="productModal" class="modal" aria-hidden="true" role="dialog">
+  <div class="modal-content" role="document">
+    <button id="modalCloseBtn" class="close-btn" aria-label="Close modal">×</button>
+
+    <img id="modalImg" alt="Product image">
+    <h3 id="modalName"></h3>
+    <p id="modalPrice"></p>
+    <p id="modalDesc"></p>
+    <p id="modalSeller"></p>
+
+    <button id="contactSellerBtn" onclick="showToast('📩 Contact Seller feature coming soon!')">📩 Contact Seller</button>
+
+    <!-- Navigation -->
+    <div class="modal-nav">
+      <button id="prevBtn">⬅ Prev</button>
+      <button id="nextBtn">Next ➡</button>
     </div>
   </div>
+</div>
+
+
 
   <!-- Toast Notification -->
   <div id="toastContainer"></div>

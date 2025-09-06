@@ -37,6 +37,7 @@ function logout() {
 
 // Product display with staggered animation
 function loadProducts(list) {
+  currentProductList = list;  // track list
   let container = document.getElementById("productList");
   container.innerHTML = "";
   if(list.length===0){
@@ -77,6 +78,7 @@ function loadWishlist() {
   let emptyMsg = document.getElementById("wishlistEmpty");
   container.innerHTML = "";
   let items = products.filter(p=>wishlist.includes(p.id));
+  currentProductList = items; // track list
   if(items.length===0) {
     emptyMsg.style.display = "block";
     return;
@@ -167,19 +169,33 @@ function clearForm() {
   document.getElementById("imagePreview").style.display = "none";
 }
 
-// Modal
+let currentProductIndex = -1;
+let currentProductList = [];
+
+// openModal: show the passed product and lock scroll
 function openModal(p) {
+  currentProductIndex = currentProductList.findIndex(x => x.id === p.id);
+
+  const modal = document.getElementById("productModal");
   document.getElementById("modalImg").src = p.img;
   document.getElementById("modalName").innerText = p.name;
   document.getElementById("modalPrice").innerText = "₹" + p.price;
   document.getElementById("modalDesc").innerText = p.desc;
   document.getElementById("modalSeller").innerText = "Seller: " + p.seller + (p.block ? " | Block: " + p.block : "");
-  document.getElementById("productModal").style.display = "flex";
+
+  modal.style.display = "flex";
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden'; // prevent background scroll when modal open
 }
 
+// closeModal: hide and restore scroll
 function closeModal() {
-  document.getElementById("productModal").style.display = "none";
+  const modal = document.getElementById("productModal");
+  modal.style.display = "none";
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
 }
+
 
 // Sidebar
 function toggleSidebar() {
@@ -241,3 +257,50 @@ function filterByBlock(block) {
   loadProducts(products.filter(p=>p.block===block));
   if (window.innerWidth <= 768) closeSidebar();
 }
+
+function nextProduct() {
+  if (currentProductIndex < currentProductList.length - 1) {
+    currentProductIndex++;
+    openModal(currentProductList[currentProductIndex]);
+  } else {
+    showToast("🚫 No more products");
+  }
+}
+
+function prevProduct() {
+  if (currentProductIndex > 0) {
+    currentProductIndex--;
+    openModal(currentProductList[currentProductIndex]);
+  } else {
+    showToast("🚫 Already at first product");
+  }
+}
+// DOM-ready bindings for modal controls, overlay click, keyboard, nav buttons
+document.addEventListener('DOMContentLoaded', () => {
+  const modal = document.getElementById('productModal');
+
+  // close button
+  const closeBtn = document.getElementById('modalCloseBtn');
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+
+  // overlay click (clicking outside modal-content closes modal)
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+  }
+
+  // next / prev buttons
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  if (prevBtn) prevBtn.addEventListener('click', prevProduct);
+  if (nextBtn) nextBtn.addEventListener('click', nextProduct);
+
+  // keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (!modal || modal.style.display !== 'flex') return;
+    if (e.key === 'Escape') closeModal();
+    else if (e.key === 'ArrowLeft') prevProduct();
+    else if (e.key === 'ArrowRight') nextProduct();
+  });
+});
