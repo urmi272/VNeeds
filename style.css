@@ -328,12 +328,56 @@ main {
 }
 .close:hover { transform: rotate(90deg); }
 
-/* Responsive */
+/* Default sidebar (desktop) */
+aside {
+  float: left;
+  width: 20%;
+  background: var(--card-bg);
+  padding: 20px;
+  border-right: 1px solid #ddd;
+  border-radius: 12px;
+  animation: slideIn 0.4s ease;
+}
+
+/* Mobile sidebar: hidden off-screen by default */
 @media (max-width: 768px) {
-  main { margin-left: 0; }
-  aside { display: none; }
-  header input { width: 100%; margin-top: 10px; }
-  .wishlist-container { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  aside {
+    position: fixed;
+    top: 0;
+    left: -260px; /* hide off screen */
+    width: 240px;
+    height: 100%;
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 0;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+    transition: left 0.3s ease;
+    z-index: 20;
+    overflow-y: auto;
+  }
+
+  aside.active {
+    left: 0; /* slide in */
+  }
+
+  /* dark overlay behind sidebar */
+  #sidebarOverlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 15;
+  }
+
+  main {
+    margin-left: 0; /* no float push */
+  }
+
+  header input {
+    width: 100%;
+    margin-top: 10px;
+  }
 }
 
 /* Mobile buttons full width */

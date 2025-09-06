@@ -107,15 +107,25 @@ function filterProducts() {
   loadProducts(filtered);
 }
 function filterCategory(cat) {
-  if(cat==="all") loadProducts(products);
-  else loadProducts(products.filter(p=>p.category===cat));
+  if (cat === "all") {
+    loadProducts(products);
+  } else {
+    loadProducts(products.filter(p => p.category === cat));
+  }
 
-  if (window.innerWidth <= 768) closeSidebar();
+  // Auto-close sidebar on mobile
+  if (window.innerWidth <= 768) {
+    closeSidebar();
+  }
 }
 function filterByPrice() {
   let max = document.getElementById("priceRange").value;
   document.getElementById("priceValue").innerText = max;
-  loadProducts(products.filter(p=>p.price<=max));
+  loadProducts(products.filter(p => p.price <= max));
+
+  if (window.innerWidth <= 768) {
+    closeSidebar();
+  }
 }
 
 // Add Product
@@ -201,12 +211,25 @@ function closeModal() {
 function toggleSidebar() {
   let sidebar = document.querySelector("aside");
   let overlay = document.getElementById("sidebarOverlay");
-  sidebar.classList.toggle("active");
-  overlay.style.display = sidebar.classList.contains("active") ? "block" : "none";
+  if (!sidebar || !overlay) return;
+
+  const isActive = sidebar.classList.contains("active");
+  if (isActive) {
+    sidebar.classList.remove("active");
+    overlay.style.display = "none";
+  } else {
+    sidebar.classList.add("active");
+    overlay.style.display = "block";
+  }
 }
+
 function closeSidebar() {
-  document.querySelector("aside").classList.remove("active");
-  document.getElementById("sidebarOverlay").style.display = "none";
+  let sidebar = document.querySelector("aside");
+  let overlay = document.getElementById("sidebarOverlay");
+  if (!sidebar || !overlay) return;
+
+  sidebar.classList.remove("active");
+  overlay.style.display = "none";
 }
 
 // Dark mode persistence
@@ -254,8 +277,12 @@ window.onload = () => {
 };
 
 function filterByBlock(block) {
-  loadProducts(products.filter(p=>p.block===block));
-  if (window.innerWidth <= 768) closeSidebar();
+  loadProducts(products.filter(p => p.block === block));
+  
+  // Auto-close sidebar on mobile
+  if (window.innerWidth <= 768) {
+    closeSidebar();
+  }
 }
 
 function nextProduct() {
