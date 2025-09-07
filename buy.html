@@ -77,8 +77,16 @@
     <p id="modalPrice"></p>
     <p id="modalDesc"></p>
     <p id="modalSeller"></p>
+    <p id="modalUpi"></p> <!-- ✅ UPI display -->
 
-    <button id="contactSellerBtn" onclick="showToast('📩 Contact Seller feature coming soon!')">📩 Contact Seller</button>
+    <div class="payment-options"> <!-- ✅ Payment buttons -->
+      <button id="cashBtn">💵 Cash Payment</button>
+      <button id="upiBtn">💸 UPI / Online</button>
+    </div>
+
+    <button id="contactSellerBtn" onclick="showToast('📩 Contact Seller feature coming soon!')">
+      📩 Contact Seller
+    </button>
 
     <!-- Navigation -->
     <div class="modal-nav">
@@ -87,6 +95,7 @@
     </div>
   </div>
 </div>
+
 
   <!-- Toast Notification -->
   <div id="toastContainer"></div>
@@ -98,8 +107,26 @@
       if (localStorage.getItem("darkMode") === "true") {
         document.body.classList.add("dark");
       }
-      loadProducts(products);
+  
+      let userBlock = localStorage.getItem("userBlock");
+  
+      if (userBlock) {
+        // Show block filter in sidebar
+        document.getElementById("blockCategory").innerHTML =
+          `<li onclick="filterByBlock('${userBlock}')">🏢 ${userBlock}</li>`;
+  
+        // Auto-load products from their block
+        let blockProducts = products.filter(p => p.block === userBlock);
+        if (blockProducts.length > 0) {
+          loadProducts(blockProducts);
+        } else {
+          loadProducts(products); // fallback
+        }
+      } else {
+        loadProducts(products);
+      }
     }
   </script>
+  
 </body>
 </html>

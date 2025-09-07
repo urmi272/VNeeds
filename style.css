@@ -643,3 +643,37 @@ body.dark .search-container input {
   background: #333;
   color: #eee;
 }
+.payment-options {
+  display: flex;
+  gap: 12px;
+  margin: 15px 0;
+  justify-content: center;
+}
+
+.payment-options button {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s, transform 0.2s;
+}
+
+#cashBtn {
+  background: #4CAF50; /* green */
+  color: white;
+}
+#cashBtn:hover {
+  background: #45a049;
+  transform: translateY(-2px);
+}
+
+#upiBtn {
+  background: var(--accent);
+  color: white;
+}
+#upiBtn:hover {
+  background: var(--color2);
+  transform: translateY(-2px);
+}

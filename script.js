@@ -142,14 +142,16 @@ function addProduct() {
   let imgFile = document.getElementById("productImage").files[0];
   let seller = localStorage.getItem("user") || "Anonymous";
   let sellerBlock = document.getElementById("sellerBlock").value;
+  let sellerUpi = document.getElementById("sellerUpi").value.trim(); // ✅ new
 
-  if(!name || !price || !category || !desc || !imgFile || !sellerBlock) {
-    showToast("⚠ Please fill all fields and select an image + block");
+  // ✅ Validation: make UPI mandatory
+  if(!name || !price || !category || !desc || !imgFile || !sellerBlock || !sellerUpi) {
+    showToast("⚠ Please fill all fields, select an image, block, and enter UPI ID");
     return;
   }
 
   let reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = function (e) {
     let newProduct = {
       id: Date.now(),
       name,
@@ -158,17 +160,25 @@ function addProduct() {
       desc,
       img: e.target.result,
       seller,
-      block: sellerBlock
+      block: sellerBlock,
+      upi: sellerUpi
     };
     products.push(newProduct);
     localStorage.setItem("products", JSON.stringify(products));
+
+    // ✅ Save updated seller details
+    localStorage.setItem("userBlock", sellerBlock);
+    localStorage.setItem("userUpi", sellerUpi);
+
     loadProducts(products);
     clearForm();
     showToast("✅ Product added successfully!");
     window.location.href = "buy.html";
+
   };
   reader.readAsDataURL(imgFile);
 }
+
 
 function clearForm() {
   document.getElementById("productName").value = "";
@@ -177,7 +187,12 @@ function clearForm() {
   document.getElementById("productDescription").value = "";
   document.getElementById("productImage").value = "";
   document.getElementById("imagePreview").style.display = "none";
+
+  // ✅ Keep auto-filled values editable
+  document.getElementById("sellerBlock").value = localStorage.getItem("userBlock") || "";
+  document.getElementById("sellerUpi").value = localStorage.getItem("userUpi") || "";
 }
+
 
 let currentProductIndex = -1;
 let currentProductList = [];
@@ -191,12 +206,32 @@ function openModal(p) {
   document.getElementById("modalName").innerText = p.name;
   document.getElementById("modalPrice").innerText = "₹" + p.price;
   document.getElementById("modalDesc").innerText = p.desc;
-  document.getElementById("modalSeller").innerText = "Seller: " + p.seller + (p.block ? " | Block: " + p.block : "");
+  document.getElementById("modalSeller").innerText = 
+    "Seller: " + p.seller + (p.block ? " | Block: " + p.block : "");
+
+  // ✅ Show UPI ID inside modal
+  document.getElementById("modalUpi").innerText = "UPI ID: " + (p.upi || "Not provided");
+
+  // ✅ Cash Payment button → simple info
+  document.getElementById("cashBtn").onclick = () => {
+    showToast("💵 Pay in cash when you meet the seller.");
+  };
+
+  // ✅ UPI / Online Payment button → redirect to UPI app
+  document.getElementById("upiBtn").onclick = () => {
+    if (p.upi) {
+      let upiUrl = `upi://pay?pa=${p.upi}&pn=${encodeURIComponent(p.seller)}&am=${p.price}&cu=INR`;
+      window.location.href = upiUrl;
+    } else {
+      showToast("❌ No UPI ID available");
+    }
+  };
 
   modal.style.display = "flex";
-  modal.setAttribute('aria-hidden', 'false');
-  document.body.style.overflow = 'hidden'; // prevent background scroll when modal open
+  modal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden"; // prevent background scroll when modal open
 }
+
 
 // closeModal: hide and restore scroll
 function closeModal() {
@@ -302,6 +337,20 @@ function prevProduct() {
     showToast("🚫 Already at first product");
   }
 }
+function saveBlockToStorage(block) {
+  if (block) {
+    localStorage.setItem("userBlock", block);
+    showToast("🏢 Block saved: " + block);
+  }
+}
+function saveUpiToStorage(upi) {
+  if (upi) {
+    localStorage.setItem("userUpi", upi);
+    showToast("💸 UPI saved: " + upi);
+  }
+}
+
+
 // DOM-ready bindings for modal controls, overlay click, keyboard, nav buttons
 document.addEventListener('DOMContentLoaded', () => {
   const modal = document.getElementById('productModal');
