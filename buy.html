@@ -84,6 +84,21 @@
       <button id="cashBtn">💵 Cash Payment</button>
       <button id="upiBtn">💸 UPI / Online</button>
     </div>
+    <!-- Hidden anchor used to trigger upi:// on mobile -->
+    <a id="upiDeepLink" href="#" rel="noopener noreferrer" style="display:none">Open UPI</a>
+    
+    <!-- Fallbacks (shown after clicking UPI) -->
+    <div id="upiChooser" style="display:none; margin-top:10px; font-size:14px;">
+      <div style="margin-bottom:6px;">Or open with:</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+        <a id="gpayLink" href="#" rel="noopener noreferrer">GPay</a>
+        <a id="phonepeLink" href="#" rel="noopener noreferrer">PhonePe</a>
+        <a id="paytmLink" href="#" rel="noopener noreferrer">Paytm</a>
+        <button id="copyUpiBtn" type="button">Copy UPI</button>
+      </div>
+      <img id="upiQr" alt="UPI QR" style="display:none; max-width:180px; margin-top:8px; border-radius:8px;">
+    </div>
+
 
     <button id="contactSellerBtn" onclick="showToast('📩 Contact Seller feature coming soon!')">
       📩 Contact Seller

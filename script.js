@@ -1,7 +1,7 @@
 let products = JSON.parse(localStorage.getItem("products")) || [
-  {id:1, name:"Maggie Pack", category:"food", price:40, desc:"Tasty instant noodles", img:"https://via.placeholder.com/150", seller:"system"},
-  {id:2, name:"T-Shirt", category:"clothes", price:250, desc:"Casual cotton T-shirt", img:"https://via.placeholder.com/150", seller:"system"},
-  {id:3, name:"Lipstick", category:"cosmetics", price:120, desc:"Matte red lipstick", img:"https://via.placeholder.com/150", seller:"system"}
+  { id: 1, name: "Maggie Pack", category: "food", price: 40, desc: "Tasty instant noodles", img: "https://via.placeholder.com/150", seller: "system" },
+  { id: 2, name: "T-Shirt", category: "clothes", price: 250, desc: "Casual cotton T-shirt", img: "https://via.placeholder.com/150", seller: "system" },
+  { id: 3, name: "Lipstick", category: "cosmetics", price: 120, desc: "Matte red lipstick", img: "https://via.placeholder.com/150", seller: "system" }
 ];
 
 let wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
@@ -14,15 +14,15 @@ function openBuy() {
 function openSell() { showPage("auth"); }
 
 function showPage(id) {
-  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
   document.getElementById(id).classList.add("active");
-  if(id==="wishlistPage") loadWishlist();
+  if (id === "wishlistPage") loadWishlist();
 }
 
 // Login/Register
 function login() {
   let email = document.getElementById("email").value;
-  if(email.endsWith("@vitbhopal.ac.in")) {
+  if (email.endsWith("@vitbhopal.ac.in")) {
     localStorage.setItem("user", email);
     showPage("dashboard");
     loadProducts(products);
@@ -40,7 +40,7 @@ function loadProducts(list) {
   currentProductList = list;  // track list
   let container = document.getElementById("productList");
   container.innerHTML = "";
-  if(list.length===0){
+  if (list.length === 0) {
     container.innerHTML = "<p style='grid-column:1/-1;text-align:center;'>No products found</p>";
     return;
   }
@@ -53,17 +53,17 @@ function loadProducts(list) {
       <img src="${p.img}">
       <h4>${p.name}</h4>
       <p>₹${p.price}</p>
-      <span class="wishlist ${wishlist.includes(p.id) ? 'active':''}" onclick="toggleWishlist(${p.id}, this); event.stopPropagation();">♥</span>
+      <span class="wishlist ${wishlist.includes(p.id) ? 'active' : ''}" onclick="toggleWishlist(${p.id}, this); event.stopPropagation();">♥</span>
     `;
-    div.onclick = ()=>openModal(p);
+    div.onclick = () => openModal(p);
     container.appendChild(div);
   });
 }
 
 // Wishlist
 function toggleWishlist(id, el) {
-  if(wishlist.includes(id)) {
-    wishlist = wishlist.filter(x=>x!==id);
+  if (wishlist.includes(id)) {
+    wishlist = wishlist.filter(x => x !== id);
     el.classList.remove("active");
     showToast("Removed from wishlist");
   } else {
@@ -77,14 +77,14 @@ function loadWishlist() {
   let container = document.getElementById("wishlistList");
   let emptyMsg = document.getElementById("wishlistEmpty");
   container.innerHTML = "";
-  let items = products.filter(p=>wishlist.includes(p.id));
+  let items = products.filter(p => wishlist.includes(p.id));
   currentProductList = items; // track list
-  if(items.length===0) {
+  if (items.length === 0) {
     emptyMsg.style.display = "block";
     return;
   }
   emptyMsg.style.display = "none";
-  items.forEach((p,i)=>{
+  items.forEach((p, i) => {
     let div = document.createElement("div");
     div.className = "product";
     div.style.opacity = "0";
@@ -100,7 +100,7 @@ function loadWishlist() {
         onclick="toggleWishlist(${p.id}, this); event.stopPropagation();">♥</span>
 `;
 
-    div.onclick = ()=>openModal(p);
+    div.onclick = () => openModal(p);
     container.appendChild(div);
   });
 }
@@ -108,7 +108,7 @@ function loadWishlist() {
 // Filters
 function filterProducts() {
   let q = document.getElementById("search").value.toLowerCase();
-  let filtered = products.filter(p=>p.name.toLowerCase().includes(q));
+  let filtered = products.filter(p => p.name.toLowerCase().includes(q));
   loadProducts(filtered);
 }
 function filterCategory(cat) {
@@ -139,6 +139,44 @@ function previewImage(event) {
   preview.src = URL.createObjectURL(event.target.files[0]);
   preview.style.display = "block";
 }
+function resizeImage(file, maxWidth, maxHeight, callback) {
+  const reader = new FileReader();
+  reader.onload = function (event) {
+    const img = new Image();
+    img.onload = function () {
+      let canvas = document.createElement("canvas");
+      let ctx = canvas.getContext("2d");
+
+      let width = img.width;
+      let height = img.height;
+
+      // Scale down
+      if (width > height) {
+        if (width > maxWidth) {
+          height *= maxWidth / width;
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxHeight) {
+          width *= maxHeight / height;
+          height = maxHeight;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Convert back to base64
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.7); // quality 70%
+      callback(dataUrl);
+    };
+    img.src = event.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 function addProduct() {
   let name = document.getElementById("productName").value.trim();
   let price = document.getElementById("productPrice").value;
@@ -150,28 +188,28 @@ function addProduct() {
   let sellerUpi = document.getElementById("sellerUpi").value.trim(); // ✅ new
 
   // ✅ Validation: make UPI mandatory
-  if(!name || !price || !category || !desc || !imgFile || !sellerBlock || !sellerUpi) {
+  if (!name || !price || !category || !desc || !imgFile || !sellerBlock || !sellerUpi) {
     showToast("⚠ Please fill all fields, select an image, block, and enter UPI ID");
     return;
   }
 
-  let reader = new FileReader();
-  reader.onload = function (e) {
+  resizeImage(imgFile, 600, 600, function (resizedDataUrl) {
     let newProduct = {
       id: Date.now(),
       name,
       price: parseInt(price),
       category,
       desc,
-      img: e.target.result,
+      img: resizedDataUrl,  // ✅ compressed image instead of full-size
       seller,
       block: sellerBlock,
       upi: sellerUpi
     };
+
     products.push(newProduct);
     localStorage.setItem("products", JSON.stringify(products));
 
-    // ✅ Save updated seller details
+    // Remember seller details
     localStorage.setItem("userBlock", sellerBlock);
     localStorage.setItem("userUpi", sellerUpi);
 
@@ -179,8 +217,8 @@ function addProduct() {
     clearForm();
     showToast("✅ Product added successfully!");
     window.location.href = "buy.html";
+  });
 
-  };
   reader.readAsDataURL(imgFile);
 }
 
@@ -210,10 +248,10 @@ function openModal(p) {
   document.getElementById("modalImg").src = p.img;
   document.getElementById("modalName").innerText = p.name;
   document.getElementById("modalPrice").innerText = "₹" + p.price;
-  document.getElementById("modalDesc").innerHTML += 
-  `<br><strong>Status:</strong> ${p.status === "out" ? "🚫 Out of Stock" : "✅ Available"}`;
-  document.getElementById("modalDesc").innerText = p.desc;
-  document.getElementById("modalSeller").innerText = 
+  document.getElementById("modalDesc").innerHTML =
+    `${p.desc}<br><strong>Status:</strong> ${p.status === "out" ? "🚫 Out of Stock" : "✅ Available"}`;
+
+  document.getElementById("modalSeller").innerText =
     "Seller: " + p.seller + (p.block ? " | Block: " + p.block : "");
   // ✅ Show stock status in modal + disable if out of stock
   if (p.status === "out") {
@@ -238,13 +276,53 @@ function openModal(p) {
 
   // ✅ UPI / Online Payment button → redirect to UPI app
   document.getElementById("upiBtn").onclick = () => {
-    if (p.upi) {
-      let upiUrl = `upi://pay?pa=${p.upi}&pn=${encodeURIComponent(p.seller)}&am=${p.price}&cu=INR`;
-      window.location.href = upiUrl;
-    } else {
-      showToast("❌ No UPI ID available");
-    }
+    if (!p.upi) { showToast("❌ No UPI ID available"); return; }
+
+    // Build the generic UPI deep link
+    const upiUrl = `upi://pay?pa=${encodeURIComponent(p.upi)}&pn=${encodeURIComponent(p.seller)}&am=${encodeURIComponent(p.price)}&cu=INR`;
+
+    // 1) Best path on Android/iOS mobile: click a real anchor with upi://
+    const a = document.getElementById("upiDeepLink");
+    a.href = upiUrl;
+    a.click();
+
+    // 2) Show fallbacks (desktop, or if the handler didn’t fire)
+    const chooser = document.getElementById("upiChooser");
+    const gpay = document.getElementById("gpayLink");
+    const phonepe = document.getElementById("phonepeLink");
+    const paytm = document.getElementById("paytmLink");
+    const copyBtn = document.getElementById("copyUpiBtn");
+    const qr = document.getElementById("upiQr");
+
+    // App-specific Android intents (optional, safe to show)
+    const q = `pa=${encodeURIComponent(p.upi)}&pn=${encodeURIComponent(p.seller)}&am=${encodeURIComponent(p.price)}&cu=INR`;
+    gpay.href = `intent://pay?${q}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`;
+    phonepe.href = `intent://pay?${q}#Intent;scheme=upi;package=com.phonepe.app;end`;
+    paytm.href = `intent://pay?${q}#Intent;scheme=upi;package=net.one97.paytm;end`;
+
+    chooser.style.display = "block";
+
+    // Copy UPI ID (works even on http/file, falls back to prompt)
+    copyBtn.onclick = async () => {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(p.upi);
+          showToast("📋 UPI ID copied");
+        } else {
+          // Fallback
+          const ok = prompt("Copy this UPI ID:", p.upi);
+          if (ok !== null) showToast("📋 UPI ID ready to paste");
+        }
+      } catch {
+        showToast("⚠ Could not copy, please long-press to copy");
+      }
+    };
+
+    // 3) Desktop fallback: show a QR the buyer can scan with any UPI app
+    qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUrl)}`;
+    qr.style.display = "block";
   };
+
 
   modal.style.display = "flex";
   modal.setAttribute("aria-hidden", "false");
@@ -316,11 +394,11 @@ window.onload = () => {
   let userBlock = localStorage.getItem("userBlock");
 
   // Insert user's block in sidebar
-  if(userBlock){
+  if (userBlock) {
     document.getElementById("blockCategory").innerHTML = `<li onclick="filterByBlock('${userBlock}')">🏢 ${userBlock}</li>`;
     // Auto-load products from their block first
     let blockProducts = products.filter(p => p.block === userBlock);
-    if(blockProducts.length > 0){
+    if (blockProducts.length > 0) {
       loadProducts(blockProducts);
     } else {
       loadProducts(products); // fallback if no products in their block
@@ -332,7 +410,7 @@ window.onload = () => {
 
 function filterByBlock(block) {
   loadProducts(products.filter(p => p.block === block));
-  
+
   // Auto-close sidebar on mobile
   if (window.innerWidth <= 768) {
     closeSidebar();
