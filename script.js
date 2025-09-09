@@ -93,8 +93,13 @@ function loadWishlist() {
       <img src="${p.img}">
       <h4>${p.name}</h4>
       <p>₹${p.price}</p>
-      <span class="wishlist active" onclick="toggleWishlist(${p.id}, this); event.stopPropagation();">♥</span>
-    `;
+      ${p.status === "out"
+        ? `<p style="color:red; font-weight:bold;">🚫 Out of Stock</p>`
+        : `<p style="color:green; font-weight:bold;">✅ Available</p>`}
+      <span class="wishlist ${wishlist.includes(p.id) ? 'active' : ''}" 
+        onclick="toggleWishlist(${p.id}, this); event.stopPropagation();">♥</span>
+`;
+
     div.onclick = ()=>openModal(p);
     container.appendChild(div);
   });
@@ -205,9 +210,23 @@ function openModal(p) {
   document.getElementById("modalImg").src = p.img;
   document.getElementById("modalName").innerText = p.name;
   document.getElementById("modalPrice").innerText = "₹" + p.price;
+  document.getElementById("modalDesc").innerHTML += 
+  `<br><strong>Status:</strong> ${p.status === "out" ? "🚫 Out of Stock" : "✅ Available"}`;
   document.getElementById("modalDesc").innerText = p.desc;
   document.getElementById("modalSeller").innerText = 
     "Seller: " + p.seller + (p.block ? " | Block: " + p.block : "");
+  // ✅ Show stock status in modal + disable if out of stock
+  if (p.status === "out") {
+    document.getElementById("cashBtn").disabled = true;
+    document.getElementById("upiBtn").disabled = true;
+    document.getElementById("cashBtn").innerText = "🚫 Out of Stock";
+    document.getElementById("upiBtn").style.display = "none";
+  } else {
+    document.getElementById("cashBtn").disabled = false;
+    document.getElementById("upiBtn").disabled = false;
+    document.getElementById("cashBtn").innerText = "💵 Cash Payment";
+    document.getElementById("upiBtn").style.display = "inline-block";
+  }
 
   // ✅ Show UPI ID inside modal
   document.getElementById("modalUpi").innerText = "UPI ID: " + (p.upi || "Not provided");
@@ -380,3 +399,64 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (e.key === 'ArrowRight') nextProduct();
   });
 });
+
+function loadMyProducts() {
+  let user = localStorage.getItem("user");
+  if (!user) {
+    showToast("⚠ Please log in first!");
+    window.location.href = "index.html";
+    return;
+  }
+
+  let myProducts = products.filter(p => p.seller === user);
+  let container = document.getElementById("myProductList");
+  container.innerHTML = "";
+
+  if (myProducts.length === 0) {
+    container.innerHTML = "<p style='text-align:center;'>You have not added any products yet.</p>";
+    return;
+  }
+
+  myProducts.forEach((p, i) => {
+    let div = document.createElement("div");
+    div.className = "product";
+    div.innerHTML = `
+      <img src="${p.img}">
+      <h4>${p.name}</h4>
+      <p>₹${p.price}</p>
+      <p>${p.status === "out" ? "🚫 Out of Stock" : "✅ Available"}</p>
+      <div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">
+        <button onclick="editProduct(${p.id})">✏ Edit</button>
+        <button onclick="deleteProduct(${p.id})">🗑 Delete</button>
+        <button onclick="toggleStock(${p.id})">
+          ${p.status === "out" ? "Mark Available" : "Mark Out of Stock"}
+        </button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function deleteProduct(id) {
+  products = products.filter(p => p.id !== id);
+  localStorage.setItem("products", JSON.stringify(products));
+  showToast("🗑 Product deleted");
+  loadMyProducts();
+}
+
+function toggleStock(id) {
+  let prod = products.find(p => p.id === id);
+  if (prod) {
+    prod.status = prod.status === "out" ? "in" : "out";
+    localStorage.setItem("products", JSON.stringify(products));
+    showToast("✔ Stock status updated");
+    loadMyProducts();
+  }
+}
+
+function editProduct(id) {
+  let prod = products.find(p => p.id === id);
+  if (!prod) return;
+  localStorage.setItem("editProduct", JSON.stringify(prod));
+  window.location.href = "sell.html?edit=1";
+}

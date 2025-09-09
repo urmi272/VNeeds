@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Products - VNeeds</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="logo"><span style="color:var(--color2)">VNeeds</span></div>
+    <div class="nav-actions">
+      <a href="buy.html"><button>⬅ Back</button></a>
+      <a href="index.html"><button>Logout</button></a>
+    </div>
+  </header>
+
+  <h2>My Products</h2>
+  <main id="myProductList">
+    <!-- Seller’s products will load here -->
+  </main>
+
+  <div id="toastContainer"></div>
+  <script src="script.js"></script>
+  <script>
+    window.onload = () => {
+      if (localStorage.getItem("darkMode") === "true") {
+        document.body.classList.add("dark");
+      }
+      loadMyProducts();
+    };
+  </script>
+</body>
+</html>

@@ -78,8 +78,39 @@
       document.getElementById("sellerBlock").value = localStorage.getItem("userBlock") || "";
       document.getElementById("sellerUpi").value = localStorage.getItem("userUpi") || "";
     };
+    // Check if editing
+let editData = JSON.parse(localStorage.getItem("editProduct"));
+if (editData) {
+  document.getElementById("productName").value = editData.name;
+  document.getElementById("productPrice").value = editData.price;
+  document.getElementById("productCategory").value = editData.category;
+  document.getElementById("productDescription").value = editData.desc;
+  document.getElementById("sellerBlock").value = editData.block || "";
+  document.getElementById("sellerUpi").value = editData.upi || "";
+  document.getElementById("imagePreview").src = editData.img;
+  document.getElementById("imagePreview").style.display = "block";
 
+  // Change button label
+  document.querySelector("button[type='submit']").innerText = "Update Product";
 
+  // Replace addProduct with update
+  window.addProduct = function() {
+    let idx = products.findIndex(p => p.id === editData.id);
+    if (idx !== -1) {
+      products[idx].name = document.getElementById("productName").value;
+      products[idx].price = parseInt(document.getElementById("productPrice").value);
+      products[idx].category = document.getElementById("productCategory").value;
+      products[idx].desc = document.getElementById("productDescription").value;
+      products[idx].block = document.getElementById("sellerBlock").value;
+      products[idx].upi = document.getElementById("sellerUpi").value;
+
+      localStorage.setItem("products", JSON.stringify(products));
+      localStorage.removeItem("editProduct");
+      showToast("✅ Product updated!");
+      window.location.href = "myproducts.html";
+    }
+  };
+}
 
   </script>
 </body>
