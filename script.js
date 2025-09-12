@@ -177,6 +177,7 @@ function resizeImage(file, maxWidth, maxHeight, callback) {
   reader.readAsDataURL(file);
 }
 
+console.log("✅ addProduct() called");
 function addProduct() {
   let name = document.getElementById("productName").value.trim();
   let price = document.getElementById("productPrice").value;
@@ -216,7 +217,10 @@ function addProduct() {
     loadProducts(products);
     clearForm();
     showToast("✅ Product added successfully!");
-    window.location.href = "buy.html";
+    setTimeout(() => {
+      window.location.href = "myproducts.html";
+    }, 1000); // wait 1 second so toast is visible
+
   });
 
   reader.readAsDataURL(imgFile);

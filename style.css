@@ -712,3 +712,40 @@ body.dark .search-container input {
     width: 100%;
   }
 }
+
+/* Compact header for mobile */
+@media (max-width: 768px) {
+  header {
+    flex-direction: row;       /* keep in one row instead of stacking */
+    flex-wrap: nowrap;         /* prevent wrapping */
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px;         /* less padding */
+    gap: 6px;
+  }
+
+  header .logo img, 
+  header .logo {
+    height: 50px;              
+    font-size: 18px;
+  }
+
+  header .nav-actions {
+    gap: 2px;
+  }
+
+  header .nav-actions button {
+    padding: 2px 4px;
+    font-size: 11px;
+  }
+
+  header .search-container {
+    width: 100%;
+    margin-top: 2px;
+  }
+
+  header input {
+    padding: 4px 6px;
+    font-size: 12px;
+  }
+}
