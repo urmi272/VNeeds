@@ -1,0 +1,48 @@
+// Paste this into Firebase Console → Firestore Database → Rules,
+// then click "Publish". Rename isn't needed — the .txt extension
+// is just so this doesn't get mistaken for a live config file.
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.uid == uid;
+
+      match /notifications/{notifId} {
+        allow read, update: if signedIn() && request.auth.uid == uid;
+        allow create: if signedIn(); // any signed-in user can notify another
+      }
+    }
+
+    match /wishlists/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.sellerUid == request.auth.uid;
+      allow update, delete: if signedIn() && resource.data.sellerUid == request.auth.uid;
+
+      match /ratings/{buyerUid} {
+        allow read: if true;
+        allow write: if signedIn() && request.auth.uid == buyerUid;
+      }
+    }
+
+    match /orders/{orderId} {
+      allow read, update: if signedIn() &&
+        (resource.data.buyerUid == request.auth.uid || resource.data.sellerUid == request.auth.uid);
+      allow create: if signedIn() && request.resource.data.buyerUid == request.auth.uid;
+
+      match /messages/{msgId} {
+        allow read, create: if signedIn() &&
+          (get(/databases/$(database)/documents/orders/$(orderId)).data.buyerUid == request.auth.uid ||
+           get(/databases/$(database)/documents/orders/$(orderId)).data.sellerUid == request.auth.uid);
+      }
+    }
+  }
+}

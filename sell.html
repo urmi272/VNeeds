@@ -7,11 +7,10 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Sell Form -->
   <div id="sellForm" class="page active">
     <div class="logo"><span style="color:var(--color2)">VNeeds</span></div>
-    <h2>Sell a Product</h2>
-    <form onsubmit="event.preventDefault(); addProduct();">
+    <h2 id="formTitle">Sell a Product</h2>
+    <form onsubmit="event.preventDefault(); submitForm();">
       <label for="productName">Product Name</label><br>
       <input type="text" id="productName" placeholder="Product Name"><br>
 
@@ -33,7 +32,7 @@
       <img id="imagePreview" style="display:none; max-width:200px; margin:10px auto; border-radius:8px;"><br>
 
       <label for="sellerBlock">Your Block</label><br>
-      <select id="sellerBlock" onchange="saveBlockToStorage(this.value)">
+      <select id="sellerBlock">
         <option value="">-- Select Block --</option>
         <optgroup label="Girls">
           <option value="Girls Block 1">Girls Block 1</option>
@@ -51,70 +50,92 @@
           <option value="Boys Block 8">Boys Block 8</option>
         </optgroup>
       </select><br>
-        <!-- ✅ New UPI field goes here -->
-        <label for="sellerUpi">Your UPI ID</label><br>
-        <input type="text" id="sellerUpi" placeholder="example@upi" onblur="saveUpiToStorage(this.value)">
 
+      <label for="sellerUpi">Your UPI ID</label><br>
+      <input type="text" id="sellerUpi" placeholder="example@upi"><br>
 
-
-
-      <button type="submit">Add Product</button>
+      <button type="submit" id="submitBtn">Add Product</button>
       <a href="buy.html"><button type="button">Cancel</button></a>
     </form>
   </div>
 
-  <!-- Toast Notification -->
   <div id="toastContainer"></div>
 
-  <script src="script.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/products.js"></script>
+
   <script>
-    // Dark mode persistence
-    window.onload = () => {
-      if (localStorage.getItem("darkMode") === "true") {
-        document.body.classList.add("dark");
+    initDarkMode();
+    let me = null;
+    let editingId = new URLSearchParams(window.location.search).get("edit");
+    let existingImg = null;
+
+    requireAuth(async (user, profile) => {
+      me = user;
+      document.getElementById("sellerBlock").value = profile.block || "";
+      document.getElementById("sellerUpi").value = profile.upi || "";
+
+      if (editingId) {
+        const p = await getProduct(editingId);
+        if (p && p.sellerUid === user.uid) {
+          document.getElementById("formTitle").innerText = "Edit Product";
+          document.getElementById("submitBtn").innerText = "Update Product";
+          document.getElementById("productName").value = p.name;
+          document.getElementById("productPrice").value = p.price;
+          document.getElementById("productCategory").value = p.category;
+          document.getElementById("productDescription").value = p.desc;
+          document.getElementById("sellerBlock").value = p.block || "";
+          document.getElementById("sellerUpi").value = p.upi || "";
+          document.getElementById("imagePreview").src = p.img;
+          document.getElementById("imagePreview").style.display = "block";
+          existingImg = p.img;
+        }
+      }
+    });
+
+    function previewImage(event) {
+      const preview = document.getElementById("imagePreview");
+      preview.src = URL.createObjectURL(event.target.files[0]);
+      preview.style.display = "block";
+    }
+
+    async function submitForm() {
+      const name = document.getElementById("productName").value.trim();
+      const price = document.getElementById("productPrice").value;
+      const category = document.getElementById("productCategory").value;
+      const desc = document.getElementById("productDescription").value.trim();
+      const imgFile = document.getElementById("productImage").files[0];
+      const block = document.getElementById("sellerBlock").value;
+      const upi = document.getElementById("sellerUpi").value.trim();
+
+      if (!name || !price || !category || !desc || !block || !upi || (!imgFile && !existingImg)) {
+        showToast("⚠ Please fill all fields, select an image, block, and enter UPI ID");
+        return;
       }
 
-      // ✅ Auto-fill block + UPI if saved
-      document.getElementById("sellerBlock").value = localStorage.getItem("userBlock") || "";
-      document.getElementById("sellerUpi").value = localStorage.getItem("userUpi") || "";
-    };
-    // Check if editing
-let editData = JSON.parse(localStorage.getItem("editProduct"));
-if (editData) {
-  document.getElementById("productName").value = editData.name;
-  document.getElementById("productPrice").value = editData.price;
-  document.getElementById("productCategory").value = editData.category;
-  document.getElementById("productDescription").value = editData.desc;
-  document.getElementById("sellerBlock").value = editData.block || "";
-  document.getElementById("sellerUpi").value = editData.upi || "";
-  document.getElementById("imagePreview").src = editData.img;
-  document.getElementById("imagePreview").style.display = "block";
+      await saveProfileField(me.uid, "block", block);
+      await saveProfileField(me.uid, "upi", upi);
 
-  // Change button label
-  document.querySelector("button[type='submit']").innerText = "Update Product";
-
-  // Replace addProduct with update
-  window.addProduct = function() {
-    let idx = products.findIndex(p => p.id === editData.id);
-    if (idx !== -1) {
-      products[idx].name = document.getElementById("productName").value;
-      products[idx].price = parseInt(document.getElementById("productPrice").value);
-      products[idx].category = document.getElementById("productCategory").value;
-      products[idx].desc = document.getElementById("productDescription").value;
-      products[idx].block = document.getElementById("sellerBlock").value;
-      products[idx].upi = document.getElementById("sellerUpi").value;
-
-      localStorage.setItem("products", JSON.stringify(products));
-      localStorage.removeItem("editProduct");
-      showToast("✅ Product updated!");
-      setTimeout(() => {
-        window.location.href = "myproducts.html";
-      }, 1000);
-
+      try {
+        if (editingId) {
+          const fields = { name, price: parseInt(price), category, desc, block, upi };
+          if (imgFile) fields.img = await resizeImage(imgFile, 500, 500, 0.5);
+          await updateProduct(editingId, fields);
+          showToast("✅ Product updated!");
+        } else {
+          await addProduct({ name, price: parseInt(price), category, desc, imgFile, block, upi }, me);
+          showToast("✅ Product added successfully!");
+        }
+        setTimeout(() => window.location.href = "myproducts.html", 900);
+      } catch (err) {
+        showToast("⚠ " + err.message);
+      }
     }
-  };
-}
-
   </script>
 </body>
 </html>

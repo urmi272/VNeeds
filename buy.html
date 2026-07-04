@@ -7,25 +7,29 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Dashboard -->
   <div id="dashboard" class="page active">
     <header>
-      <div class="logo">
-        <img src="logo.png" alt="VNeeds Logo" class="logo-img">
-      </div>
+      <div class="logo"><img src="logo.png" alt="VNeeds Logo" class="logo-img"></div>
 
-    <div class="search-container">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="search" placeholder="Search products..." onkeyup="filterProducts()">
-    </div>
+      <div class="search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search" placeholder="Search products..." onkeyup="filterProducts()">
+      </div>
 
       <div class="nav-actions">
         <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
         <a href="sell.html"><button>+ Sell</button></a>
         <a href="myproducts.html"><button>📦 My Products</button></a>
+        <a href="orders.html"><button>🧾 Orders</button></a>
         <button onclick="showPage('wishlistPage')">❤️ Wishlist</button>
-        <button id="darkToggle" onclick="toggleDarkMode()">🌙</button>
-        <a href="index.html"><button>Logout</button></a>
+
+        <div class="notif-wrap">
+          <button id="notifBell">🔔<span id="notifBadge" class="notif-badge"></span></button>
+          <div id="notifDropdown" class="notif-dropdown"></div>
+        </div>
+
+        <button id="darkToggle">🌙</button>
+        <button onclick="doLogout()">Logout</button>
       </div>
     </header>
 
@@ -38,8 +42,7 @@
         <li onclick="filterCategory('cosmetics')">💄 Cosmetics</li>
       </ul>
       <h3>Your Block</h3>
-        <ul id="blockCategory"></ul>
-
+      <ul id="blockCategory"></ul>
       <h3>Price</h3>
       <input type="range" id="priceRange" min="0" max="500" step="10" oninput="filterByPrice()">
       <span id="priceValue">500</span>
@@ -47,102 +50,235 @@
 
     <div id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-    <main id="productList">
-      <!-- Products dynamically inserted here -->
-    </main>
+    <main id="productList"></main>
   </div>
 
-  <!-- Wishlist Page -->
   <div id="wishlistPage" class="page">
     <header>
       <div class="logo"><span style="color:var(--color2)">VNeeds</span></div>
-      <div>
-        <button onclick="showPage('dashboard')">⬅ Back</button>
-        <a href="index.html"><button>Logout</button></a>
-      </div>
+      <div><button onclick="showPage('dashboard')">⬅ Back</button></div>
     </header>
     <h2>Your Wishlist ❤️</h2>
     <div id="wishlistList" class="wishlist-container"></div>
-    <div id="wishlistEmpty" style="display:none; margin-top:20px;">
-      <p>✨ No items yet. Start exploring products!</p>
-    </div>
   </div>
 
-<!-- Product Details Modal -->
-<div id="productModal" class="modal" aria-hidden="true" role="dialog">
-  <div class="modal-content" role="document">
-    <button id="modalCloseBtn" class="close-btn" aria-label="Close modal">×</button>
+  <!-- Product Details Modal -->
+  <div id="productModal" class="modal" aria-hidden="true" role="dialog">
+    <div class="modal-content" role="document">
+      <button id="modalCloseBtn" class="close-btn" aria-label="Close modal">×</button>
+      <img id="modalImg" alt="Product image">
+      <h3 id="modalName"></h3>
+      <p id="modalRating" class="rating-line"></p>
+      <p id="modalPrice"></p>
+      <p id="modalDesc"></p>
+      <p id="modalSeller"></p>
+      <p id="modalUpi"></p>
 
-    <img id="modalImg" alt="Product image">
-    <h3 id="modalName"></h3>
-    <p id="modalPrice"></p>
-    <p id="modalDesc"></p>
-    <p id="modalSeller"></p>
-    <p id="modalUpi"></p> <!-- ✅ UPI display -->
-
-    <div class="payment-options"> <!-- ✅ Payment buttons -->
-      <button id="cashBtn">💵 Cash Payment</button>
-      <button id="upiBtn">💸 UPI / Online</button>
-    </div>
-    <!-- Hidden anchor used to trigger upi:// on mobile -->
-    <a id="upiDeepLink" href="#" rel="noopener noreferrer" style="display:none">Open UPI</a>
-    
-    <!-- Fallbacks (shown after clicking UPI) -->
-    <div id="upiChooser" style="display:none; margin-top:10px; font-size:14px;">
-      <div style="margin-bottom:6px;">Or open with:</div>
-      <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
-        <a id="gpayLink" href="#" rel="noopener noreferrer">GPay</a>
-        <a id="phonepeLink" href="#" rel="noopener noreferrer">PhonePe</a>
-        <a id="paytmLink" href="#" rel="noopener noreferrer">Paytm</a>
-        <button id="copyUpiBtn" type="button">Copy UPI</button>
+      <div class="payment-options">
+        <button id="cashBtn">💵 Cash Payment</button>
+        <button id="upiBtn">💸 UPI / Online</button>
       </div>
-      <img id="upiQr" alt="UPI QR" style="display:none; max-width:180px; margin-top:8px; border-radius:8px;">
-    </div>
+      <a id="upiDeepLink" href="#" rel="noopener noreferrer" style="display:none">Open UPI</a>
+      <div id="upiChooser" style="display:none; margin-top:10px; font-size:14px;">
+        <div style="margin-bottom:6px;">Or open with:</div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+          <a id="gpayLink" href="#" rel="noopener noreferrer">GPay</a>
+          <a id="phonepeLink" href="#" rel="noopener noreferrer">PhonePe</a>
+          <a id="paytmLink" href="#" rel="noopener noreferrer">Paytm</a>
+          <button id="copyUpiBtn" type="button">Copy UPI</button>
+        </div>
+        <img id="upiQr" alt="UPI QR" style="display:none; max-width:180px; margin-top:8px; border-radius:8px;">
+      </div>
 
-
-    <button id="contactSellerBtn" onclick="showToast('📩 Contact Seller feature coming soon!')">
-      📩 Contact Seller
-    </button>
-
-    <!-- Navigation -->
-    <div class="modal-nav">
-      <button id="prevBtn">⬅ Prev</button>
-      <button id="nextBtn">Next ➡</button>
+      <div class="modal-nav">
+        <button id="prevBtn">⬅ Prev</button>
+        <button id="nextBtn">Next ➡</button>
+      </div>
     </div>
   </div>
-</div>
 
-
-  <!-- Toast Notification -->
   <div id="toastContainer"></div>
 
-  <script src="script.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/products.js"></script>
+  <script src="js/wishlist.js"></script>
+  <script src="js/orders.js"></script>
+  <script src="js/ratings.js"></script>
+  <script src="js/notifications.js"></script>
+
   <script>
-    // Load products on page load
-    window.onload = () => {
-      if (localStorage.getItem("darkMode") === "true") {
-        document.body.classList.add("dark");
-      }
-  
-      let userBlock = localStorage.getItem("userBlock");
-  
-      if (userBlock) {
-        // Show block filter in sidebar
+    initDarkMode();
+    let me = null, myProfile = null, allProducts = [], wishlist = [];
+    let currentProductList = [], currentProductIndex = -1, unsubscribeProducts = null;
+
+    requireAuth(async (user, profile) => {
+      me = user; myProfile = profile;
+      initNotificationBell(user.uid);
+
+      if (profile.block) {
         document.getElementById("blockCategory").innerHTML =
-          `<li onclick="filterByBlock('${userBlock}')">🏢 ${userBlock}</li>`;
-  
-        // Auto-load products from their block
-        let blockProducts = products.filter(p => p.block === userBlock);
-        if (blockProducts.length > 0) {
-          loadProducts(blockProducts);
-        } else {
-          loadProducts(products); // fallback
-        }
-      } else {
-        loadProducts(products);
+          `<li onclick="filterByBlock('${profile.block}')">🏢 ${profile.block}</li>`;
       }
+
+      wishlist = await getWishlist(user.uid);
+      showSkeletons(document.getElementById("productList"));
+
+      unsubscribeProducts = watchProducts((products) => {
+        allProducts = products;
+        const blockMatches = profile.block ? products.filter(p => p.block === profile.block) : [];
+        loadProducts(blockMatches.length ? blockMatches : products);
+      });
+    });
+
+    function showPage(id) {
+      document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      if (id === "wishlistPage") loadWishlistView();
     }
+
+    function doLogout() {
+      if (unsubscribeProducts) unsubscribeProducts();
+      logout().then(() => window.location.href = "index.html");
+    }
+
+    function productCardHTML(p, i) {
+      const isWishlisted = wishlist.includes(p.id);
+      return `
+        <div class="product" style="animation-delay:${i * 0.05}s" onclick='openModal(${JSON.stringify(p).replace(/'/g, "&apos;")})'>
+          <img src="${p.img}" loading="lazy">
+          <h4>${p.name}</h4>
+          <p>₹${p.price}</p>
+          ${p.ratingCount ? `<p class="rating-line">${starString(p.avgRating)} (${p.ratingCount})</p>` : `<p class="rating-line muted">No ratings yet</p>`}
+          ${p.status === "out" ? `<p class="stock-badge out">🚫 Out of Stock</p>` : `<p class="stock-badge in">✅ Available</p>`}
+          <span class="wishlist ${isWishlisted ? 'active' : ''}" onclick="handleWishlistClick(event, '${p.id}', this)">♥</span>
+        </div>`;
+    }
+
+    function loadProducts(list) {
+      currentProductList = list;
+      const container = document.getElementById("productList");
+      if (list.length === 0) { emptyState(container, "🔍", "No products found"); return; }
+      container.innerHTML = list.map(productCardHTML).join("");
+    }
+
+    async function handleWishlistClick(e, id, el) {
+      e.stopPropagation();
+      const nowActive = await toggleWishlistItem(me.uid, id);
+      wishlist = nowActive ? [...wishlist, id] : wishlist.filter(x => x !== id);
+      el.classList.toggle("active", nowActive);
+      showToast(nowActive ? "Added to wishlist" : "Removed from wishlist");
+    }
+
+    async function loadWishlistView() {
+      const container = document.getElementById("wishlistList");
+      const items = allProducts.filter(p => wishlist.includes(p.id));
+      currentProductList = items;
+      if (!items.length) { emptyState(container, "✨", "No items yet. Start exploring products!"); return; }
+      container.innerHTML = items.map(productCardHTML).join("");
+    }
+
+    function filterProducts() {
+      const q = document.getElementById("search").value.toLowerCase();
+      loadProducts(allProducts.filter(p => p.name.toLowerCase().includes(q)));
+    }
+    function filterCategory(cat) {
+      loadProducts(cat === "all" ? allProducts : allProducts.filter(p => p.category === cat));
+      if (window.innerWidth <= 768) closeSidebar();
+    }
+    function filterByBlock(block) {
+      loadProducts(allProducts.filter(p => p.block === block));
+      if (window.innerWidth <= 768) closeSidebar();
+    }
+    function filterByPrice() {
+      const max = document.getElementById("priceRange").value;
+      document.getElementById("priceValue").innerText = max;
+      loadProducts(allProducts.filter(p => p.price <= max));
+      if (window.innerWidth <= 768) closeSidebar();
+    }
+
+    // ----- Modal / order / rating flow -----
+    function openModal(p) {
+      currentProductIndex = currentProductList.findIndex(x => x.id === p.id);
+      document.getElementById("modalImg").src = p.img;
+      document.getElementById("modalName").innerText = p.name;
+      document.getElementById("modalRating").innerText = p.ratingCount ? `${starString(p.avgRating)} (${p.ratingCount} ratings)` : "No ratings yet";
+      document.getElementById("modalPrice").innerText = "₹" + p.price;
+      document.getElementById("modalDesc").innerHTML = `${p.desc}<br><strong>Status:</strong> ${p.status === "out" ? "🚫 Out of Stock" : "✅ Available"}`;
+      document.getElementById("modalSeller").innerText = "Seller: " + p.sellerName + (p.block ? " | Block: " + p.block : "");
+      document.getElementById("modalUpi").innerText = "UPI ID: " + (p.upi || "Not provided");
+
+      const cashBtn = document.getElementById("cashBtn"), upiBtn = document.getElementById("upiBtn");
+      const isMine = p.sellerUid === me.uid;
+      const disabled = p.status === "out" || isMine;
+      cashBtn.disabled = disabled; upiBtn.disabled = disabled;
+      cashBtn.innerText = isMine ? "This is your listing" : (p.status === "out" ? "🚫 Out of Stock" : "💵 Cash Payment");
+      upiBtn.style.display = isMine || p.status === "out" ? "none" : "inline-block";
+
+      cashBtn.onclick = () => placeOrder(p, "cash");
+      upiBtn.onclick = () => placeOrder(p, "upi");
+
+      document.getElementById("productModal").style.display = "flex";
+      document.getElementById("productModal").setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+
+    async function placeOrder(p, method) {
+      if (method === "upi" && p.upi) {
+        const upiUrl = `upi://pay?pa=${encodeURIComponent(p.upi)}&pn=${encodeURIComponent(p.sellerName)}&am=${encodeURIComponent(p.price)}&cu=INR`;
+        const a = document.getElementById("upiDeepLink");
+        a.href = upiUrl; a.click();
+        const q = `pa=${encodeURIComponent(p.upi)}&pn=${encodeURIComponent(p.sellerName)}&am=${encodeURIComponent(p.price)}&cu=INR`;
+        document.getElementById("gpayLink").href = `intent://pay?${q}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`;
+        document.getElementById("phonepeLink").href = `intent://pay?${q}#Intent;scheme=upi;package=com.phonepe.app;end`;
+        document.getElementById("paytmLink").href = `intent://pay?${q}#Intent;scheme=upi;package=net.one97.paytm;end`;
+        document.getElementById("copyUpiBtn").onclick = async () => {
+          try { await navigator.clipboard.writeText(p.upi); showToast("📋 UPI ID copied"); }
+          catch { prompt("Copy this UPI ID:", p.upi); }
+        };
+        const qr = document.getElementById("upiQr");
+        qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUrl)}`;
+        qr.style.display = "block";
+        document.getElementById("upiChooser").style.display = "block";
+      } else {
+        showToast("💵 Pay in cash when you meet the seller.");
+      }
+      await createOrder(p, me, method);
+      showToast("🧾 Order placed! Track it in Orders.");
+    }
+
+    function closeModal() {
+      document.getElementById("productModal").style.display = "none";
+      document.getElementById("productModal").setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+    function nextProduct() {
+      if (currentProductIndex < currentProductList.length - 1) openModal(currentProductList[++currentProductIndex]);
+      else showToast("🚫 No more products");
+    }
+    function prevProduct() {
+      if (currentProductIndex > 0) openModal(currentProductList[--currentProductIndex]);
+      else showToast("🚫 Already at first product");
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("modalCloseBtn").addEventListener("click", closeModal);
+      document.getElementById("productModal").addEventListener("click", (e) => {
+        if (e.target.id === "productModal") closeModal();
+      });
+      document.getElementById("prevBtn").addEventListener("click", prevProduct);
+      document.getElementById("nextBtn").addEventListener("click", nextProduct);
+      document.addEventListener("keydown", (e) => {
+        if (document.getElementById("productModal").style.display !== "flex") return;
+        if (e.key === "Escape") closeModal();
+        else if (e.key === "ArrowLeft") prevProduct();
+        else if (e.key === "ArrowRight") nextProduct();
+      });
+    });
   </script>
-  
 </body>
 </html>

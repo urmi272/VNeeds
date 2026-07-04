@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - VNeeds</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page active auth-page">
+    <div class="logo"><span style="color:var(--color2)">VNeeds</span></div>
+
+    <div id="loginBox" class="auth-box">
+      <h2>Welcome back</h2>
+      <input type="email" id="loginEmail" placeholder="College email">
+      <input type="password" id="loginPassword" placeholder="Password">
+      <button onclick="doLogin()">Log In</button>
+      <p class="switch-auth">New here? <a onclick="showSignup()">Create an account</a></p>
+    </div>
+
+    <div id="signupBox" class="auth-box" style="display:none;">
+      <h2>Create your account</h2>
+      <input type="text" id="signupName" placeholder="Full name">
+      <input type="email" id="signupEmail" placeholder="College email (@vitbhopal.ac.in)">
+      <input type="password" id="signupPassword" placeholder="Password (min 6 characters)">
+      <button onclick="doSignup()">Sign Up</button>
+      <p class="switch-auth">Already have an account? <a onclick="showLogin()">Log in</a></p>
+    </div>
+
+    <p id="authError" class="auth-error"></p>
+  </div>
+
+  <div id="toastContainer"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    initDarkMode();
+
+    // If already logged in, skip straight to the app
+    auth.onAuthStateChanged(user => {
+      if (user) window.location.href = "buy.html";
+    });
+
+    function showSignup() {
+      document.getElementById("loginBox").style.display = "none";
+      document.getElementById("signupBox").style.display = "block";
+      document.getElementById("authError").innerText = "";
+    }
+    function showLogin() {
+      document.getElementById("signupBox").style.display = "none";
+      document.getElementById("loginBox").style.display = "block";
+      document.getElementById("authError").innerText = "";
+    }
+
+    async function doLogin() {
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value;
+      try {
+        await login(email, password);
+        window.location.href = "buy.html";
+      } catch (err) {
+        document.getElementById("authError").innerText = err.message;
+      }
+    }
+
+    async function doSignup() {
+      const name = document.getElementById("signupName").value.trim();
+      const email = document.getElementById("signupEmail").value.trim();
+      const password = document.getElementById("signupPassword").value;
+      if (!name || !email || !password) {
+        document.getElementById("authError").innerText = "Please fill in every field";
+        return;
+      }
+      try {
+        await signup(email, password, name);
+        window.location.href = "block.html";
+      } catch (err) {
+        document.getElementById("authError").innerText = err.message;
+      }
+    }
+  </script>
+</body>
+</html>

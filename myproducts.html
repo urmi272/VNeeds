@@ -11,24 +11,69 @@
     <div class="logo"><span style="color:var(--color2)">VNeeds</span></div>
     <div class="nav-actions">
       <a href="buy.html"><button>⬅ Back</button></a>
-      <a href="index.html"><button>Logout</button></a>
+      <button onclick="doLogout()">Logout</button>
     </div>
   </header>
 
-  <h2>My Products</h2>
-  <main id="myProductList">
-    <!-- Seller’s products will load here -->
-  </main>
+  <h2 style="text-align:center;">My Products</h2>
+  <main id="myProductList"></main>
 
   <div id="toastContainer"></div>
-  <script src="script.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/products.js"></script>
+  <script src="js/ratings.js"></script>
+
   <script>
-    window.onload = () => {
-      if (localStorage.getItem("darkMode") === "true") {
-        document.body.classList.add("dark");
-      }
+    initDarkMode();
+    let me = null;
+
+    requireAuth(async (user) => {
+      me = user;
+      showSkeletons(document.getElementById("myProductList"), 3);
+      await loadMyProducts();
+    });
+
+    function doLogout() { logout().then(() => window.location.href = "index.html"); }
+
+    async function loadMyProducts() {
+      const container = document.getElementById("myProductList");
+      const mine = await fetchMyProducts(me.uid);
+      if (!mine.length) { emptyState(container, "📦", "You have not added any products yet."); return; }
+
+      container.innerHTML = mine.map(p => `
+        <div class="product">
+          <img src="${p.img}">
+          <h4>${p.name}</h4>
+          <p>₹${p.price}</p>
+          ${p.ratingCount ? `<p class="rating-line">${starString(p.avgRating)} (${p.ratingCount})</p>` : `<p class="rating-line muted">No ratings yet</p>`}
+          <p class="stock-badge ${p.status === 'out' ? 'out' : 'in'}">${p.status === "out" ? "🚫 Out of Stock" : "✅ Available"}</p>
+          <div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap; justify-content:center;">
+            <a href="sell.html?edit=${p.id}"><button>✏ Edit</button></a>
+            <button onclick="removeProduct('${p.id}')">🗑 Delete</button>
+            <button onclick="flipStock('${p.id}', '${p.status}')">${p.status === "out" ? "Mark Available" : "Mark Out of Stock"}</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    async function removeProduct(id) {
+      if (!confirm("Delete this product?")) return;
+      await deleteProduct(id);
+      showToast("🗑 Product deleted");
       loadMyProducts();
-    };
+    }
+
+    async function flipStock(id, status) {
+      await updateProduct(id, { status: status === "out" ? "in" : "out" });
+      showToast("✔ Stock status updated");
+      loadMyProducts();
+    }
   </script>
 </body>
 </html>

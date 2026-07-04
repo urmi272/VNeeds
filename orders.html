@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orders - VNeeds</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="logo"><span style="color:var(--color2)">VNeeds</span></div>
+    <div class="nav-actions">
+      <a href="buy.html"><button>⬅ Back</button></a>
+      <div class="notif-wrap">
+        <button id="notifBell">🔔<span id="notifBadge" class="notif-badge"></span></button>
+        <div id="notifDropdown" class="notif-dropdown"></div>
+      </div>
+      <button onclick="doLogout()">Logout</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="buying" onclick="switchTab('buying')">🛒 Buying</button>
+    <button class="tab-btn" data-tab="selling" onclick="switchTab('selling')">🏷 Selling</button>
+  </div>
+
+  <div id="buyingList" class="order-list"></div>
+  <div id="sellingList" class="order-list" style="display:none;"></div>
+
+  <!-- Chat / order detail modal -->
+  <div id="chatModal" class="modal" aria-hidden="true">
+    <div class="modal-content chat-modal">
+      <button class="close-btn" onclick="closeChat()">×</button>
+      <h3 id="chatTitle"></h3>
+      <p id="chatMeta" class="rating-line muted"></p>
+
+      <div id="statusActions" class="status-actions"></div>
+
+      <div id="chatMessages" class="chat-messages"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="Type a message...">
+        <button onclick="sendChatMessage()">Send</button>
+      </div>
+
+      <div id="ratingSection" class="rating-section" style="display:none;">
+        <h4>Rate this product</h4>
+        <div id="starPicker"></div>
+        <textarea id="ratingComment" placeholder="Leave a comment (optional)"></textarea>
+        <button onclick="submitOrderRating()">Submit Rating</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/orders.js"></script>
+  <script src="js/ratings.js"></script>
+  <script src="js/notifications.js"></script>
+
+  <script>
+    initDarkMode();
+    let me = null, unsubMessages = null, activeOrder = null;
+
+    requireAuth(async (user) => {
+      me = user;
+      initNotificationBell(user.uid);
+      await refreshOrders();
+    });
+
+    function doLogout() { logout().then(() => window.location.href = "index.html"); }
+
+    function switchTab(tab) {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+      document.getElementById("buyingList").style.display = tab === "buying" ? "grid" : "none";
+      document.getElementById("sellingList").style.display = tab === "selling" ? "grid" : "none";
+    }
+
+    function statusBadge(status) {
+      const map = { pending: "⏳ Pending", confirmed: "✅ Confirmed", completed: "🎉 Completed", cancelled: "❌ Cancelled" };
+      return `<span class="stock-badge ${status === 'cancelled' ? 'out' : 'in'}">${map[status] || status}</span>`;
+    }
+
+    function orderCard(o) {
+      const other = o.role === "buyer" ? o.sellerName : o.buyerName;
+      return `
+        <div class="product order-card" onclick='openChat(${JSON.stringify(o).replace(/'/g, "&apos;")})'>
+          <img src="${o.productImg}">
+          <h4>${o.productName}</h4>
+          <p>₹${o.price} · ${o.paymentMethod.toUpperCase()}</p>
+          <p class="rating-line muted">${o.role === "buyer" ? "Seller" : "Buyer"}: ${other}</p>
+          ${statusBadge(o.status)}
+        </div>`;
+    }
+
+    async function refreshOrders() {
+      showSkeletons(document.getElementById("buyingList"), 2);
+      showSkeletons(document.getElementById("sellingList"), 2);
+      const { buying, selling } = await fetchOrdersFor(me.uid);
+      const bC = document.getElementById("buyingList"), sC = document.getElementById("sellingList");
+      buying.length ? bC.innerHTML = buying.map(orderCard).join("") : emptyState(bC, "🛒", "You haven't ordered anything yet.");
+      selling.length ? sC.innerHTML = selling.map(orderCard).join("") : emptyState(sC, "🏷", "No orders on your listings yet.");
+    }
+
+    function openChat(order) {
+      activeOrder = order;
+      document.getElementById("chatTitle").innerText = order.productName;
+      document.getElementById("chatMeta").innerText =
+        `${order.role === "buyer" ? "Seller" : "Buyer"}: ${order.role === "buyer" ? order.sellerName : order.buyerName} · ₹${order.price} · ${statusText(order.status)}`;
+
+      const actions = document.getElementById("statusActions");
+      actions.innerHTML = "";
+      if (order.role === "seller" && order.status === "pending") {
+        actions.innerHTML = `<button onclick="setStatus('confirmed')">✅ Confirm Order</button>
+                              <button onclick="setStatus('cancelled')">❌ Cancel Order</button>`;
+      } else if (order.role === "seller" && order.status === "confirmed") {
+        actions.innerHTML = `<button onclick="setStatus('completed')">🎉 Mark Completed</button>`;
+      }
+
+      const ratingSection = document.getElementById("ratingSection");
+      ratingSection.style.display = (order.role === "buyer" && order.status === "completed") ? "block" : "none";
+      if (ratingSection.style.display === "block") {
+        document.getElementById("starPicker").innerHTML = starPickerHTML("orderStarPicker");
+        window.selectedStars = 0;
+        bindStarPicker("orderStarPicker", (v) => window.selectedStars = v);
+      }
+
+      if (unsubMessages) unsubMessages();
+      unsubMessages = watchMessages(order.id, renderMessages);
+
+      document.getElementById("chatModal").style.display = "flex";
+      document.getElementById("chatModal").setAttribute("aria-hidden", "false");
+    }
+
+    function statusText(s) {
+      return { pending: "⏳ Pending", confirmed: "✅ Confirmed", completed: "🎉 Completed", cancelled: "❌ Cancelled" }[s] || s;
+    }
+
+    function renderMessages(messages) {
+      const box = document.getElementById("chatMessages");
+      box.innerHTML = messages.length ? messages.map(m => `
+        <div class="chat-bubble ${m.senderUid === me.uid ? 'mine' : ''}">
+          <span class="chat-sender">${m.senderUid === me.uid ? 'You' : m.senderName}</span>${m.text}
+        </div>`).join("") : `<p class="rating-line muted" style="text-align:center;">Say hello 👋</p>`;
+      box.scrollTop = box.scrollHeight;
+    }
+
+    async function sendChatMessage() {
+      const input = document.getElementById("chatInput");
+      const text = input.value.trim();
+      if (!text || !activeOrder) return;
+      const otherUid = activeOrder.role === "buyer" ? activeOrder.sellerUid : activeOrder.buyerUid;
+      await sendMessage(activeOrder.id, me, text, otherUid);
+      input.value = "";
+    }
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("chatInput").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") sendChatMessage();
+      });
+    });
+
+    async function setStatus(status) {
+      await updateOrderStatus(activeOrder.id, status);
+      activeOrder.status = status;
+      showToast("Order status updated");
+      closeChat();
+      refreshOrders();
+    }
+
+    async function submitOrderRating() {
+      if (!window.selectedStars) { showToast("⚠ Please select a star rating"); return; }
+      const comment = document.getElementById("ratingComment").value.trim();
+      await submitRating(activeOrder.productId, me.uid, window.selectedStars, comment);
+      showToast("⭐ Thanks for rating!");
+      closeChat();
+    }
+
+    function closeChat() {
+      if (unsubMessages) unsubMessages();
+      document.getElementById("chatModal").style.display = "none";
+      document.getElementById("chatModal").setAttribute("aria-hidden", "true");
+    }
+  </script>
+</body>
+</html>

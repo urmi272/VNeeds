@@ -5,28 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VNeeds</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-  <link rel="manifest" href="/site.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Landing Page -->
   <div id="landing" class="page active">
     <div class="logo">
       <img src="logo.png" alt="VNeeds Logo" class="logo-img">
     </div>
-
     <h1>Welcome to VNeeds</h1>
     <p>Turn your hostel needs into quick deals - anytime, anywhere.</p>
     <div class="options">
-      <a href="block.html"><button>Buy</button></a>
-      <a href="sell.html"><button>Sell</button></a>
+      <button onclick="goBuy()">Buy</button>
+      <button onclick="goSell()">Sell</button>
     </div>
   </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script>
+    function goBuy() {
+      auth.onAuthStateChanged(user => {
+        window.location.href = user ? "buy.html" : "login.html";
+      });
+    }
+    function goSell() {
+      auth.onAuthStateChanged(user => {
+        window.location.href = user ? "sell.html" : "login.html";
+      });
+    }
+  </script>
 </body>
 </html>

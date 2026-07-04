@@ -749,3 +749,197 @@ body.dark .search-container input {
     font-size: 12px;
   }
 }
+
+/* ============================================================
+   NEW: Auth pages (login/signup, block select)
+   ============================================================ */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.auth-box {
+  background: var(--card-bg);
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  width: 90%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: fadeIn 0.5s ease;
+}
+.auth-box input {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background: var(--color4);
+}
+.auth-box button {
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+.auth-box button:hover { background: var(--color2); transform: translateY(-2px); }
+.switch-auth { font-size: 14px; text-align: center; margin: 0; }
+.switch-auth a { color: var(--accent); cursor: pointer; font-weight: 600; text-decoration: underline; }
+.auth-error { color: #e05252; font-weight: 600; min-height: 20px; }
+.block-select { padding: 12px; border-radius: 8px; font-size: 16px; }
+
+/* ============================================================
+   NEW: Notification bell
+   ============================================================ */
+.notif-wrap { position: relative; }
+.notif-badge {
+  display: none;
+  position: absolute;
+  top: -4px; right: -4px;
+  background: var(--wishlist);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 50%;
+  min-width: 16px;
+  height: 16px;
+  line-height: 16px;
+  text-align: center;
+  padding: 0 2px;
+}
+.notif-dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 42px;
+  width: 280px;
+  max-height: 320px;
+  overflow-y: auto;
+  background: var(--card-bg);
+  color: var(--text);
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  z-index: 40;
+  text-align: left;
+}
+.notif-dropdown.open { display: block; animation: fadeIn 0.2s ease; }
+.notif-item {
+  padding: 12px 14px;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  cursor: pointer;
+}
+.notif-item:hover { background: var(--color3); }
+.notif-item.unread { font-weight: 700; border-left: 3px solid var(--accent); }
+
+/* ============================================================
+   NEW: Skeleton loaders + empty states
+   ============================================================ */
+.skeleton { cursor: default; }
+.skel-img, .skel-line {
+  background: linear-gradient(90deg, var(--color3) 25%, var(--color4) 50%, var(--color3) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 8px;
+}
+.skel-img { width: 100%; height: 140px; margin-bottom: 10px; }
+.skel-line { height: 14px; margin: 6px 0; }
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.empty-state {
+  grid-column: 1/-1;
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text);
+  opacity: 0.7;
+}
+.empty-icon { font-size: 48px; margin-bottom: 10px; }
+
+/* ============================================================
+   NEW: Ratings / stars
+   ============================================================ */
+.rating-line { color: #d9a441; font-weight: 600; margin: 4px 0; }
+.rating-line.muted { color: var(--text); opacity: 0.5; font-weight: 400; font-size: 12px; }
+.star-picker { font-size: 30px; letter-spacing: 4px; cursor: pointer; margin: 10px 0; }
+.star-picker span { transition: transform 0.15s; }
+.star-picker span:hover { transform: scale(1.2); }
+.stock-badge { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; display: inline-block; }
+.stock-badge.in { color: #2e7d32; background: rgba(46,125,50,0.12); }
+.stock-badge.out { color: #c62828; background: rgba(198,40,40,0.12); }
+
+/* ============================================================
+   NEW: Orders page + tabs + chat
+   ============================================================ */
+.tabs { display: flex; justify-content: center; gap: 10px; margin: 20px 0; }
+.tab-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  background: var(--card-bg);
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+}
+.tab-btn.active { background: var(--accent); color: #fff; }
+.order-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.order-card { position: relative; }
+
+.chat-modal { max-width: 480px; text-align: left; }
+.chat-modal h3 { text-align: center; }
+.status-actions { display: flex; gap: 10px; justify-content: center; margin-bottom: 12px; flex-wrap: wrap; }
+.status-actions button {
+  padding: 8px 14px; border: none; border-radius: 8px;
+  background: var(--accent); color: #fff; font-weight: 600; cursor: pointer;
+}
+.chat-messages {
+  max-height: 220px;
+  overflow-y: auto;
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chat-bubble {
+  align-self: flex-start;
+  background: var(--card-bg);
+  padding: 8px 12px;
+  border-radius: 12px;
+  max-width: 80%;
+  font-size: 14px;
+}
+.chat-bubble.mine { align-self: flex-end; background: var(--accent); color: #fff; }
+.chat-sender { display: block; font-size: 10px; opacity: 0.7; margin-bottom: 2px; }
+.chat-input-row { display: flex; gap: 8px; margin-top: 10px; }
+.chat-input-row input {
+  flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ccc; background: var(--color4);
+}
+.chat-input-row button {
+  padding: 10px 16px; border: none; border-radius: 8px; background: var(--accent); color: #fff; cursor: pointer;
+}
+.rating-section { margin-top: 16px; text-align: center; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 12px; }
+.rating-section textarea {
+  width: 100%; box-sizing: border-box; padding: 10px; border-radius: 8px; border: 1px solid #ccc;
+  background: var(--color4); resize: none; height: 60px; margin: 8px 0;
+}
+.rating-section button {
+  padding: 10px 18px; border: none; border-radius: 8px; background: var(--accent); color: #fff;
+  font-weight: 600; cursor: pointer;
+}
