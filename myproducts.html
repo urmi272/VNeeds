@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Products - VNeeds</title>
-  <link rel="stylesheet" href="./styles/main.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
@@ -16,6 +16,9 @@
   </header>
 
   <h2 style="text-align:center;">My Products</h2>
+  <div style="text-align:center; margin-bottom:16px;">
+    <button onclick="addDemoProducts()" style="padding:10px 20px;border-radius:8px;border:none;background:var(--primary);color:#fff;font-weight:700;cursor:pointer;">🌱 Add Sample Products</button>
+  </div>
   <main id="myProductList"></main>
 
   <div id="toastContainer"></div>
@@ -72,6 +75,13 @@
     async function flipStock(id, status) {
       await updateProduct(id, { status: status === "out" ? "in" : "out" });
       showToast("✔ Stock status updated");
+      loadMyProducts();
+    }
+
+    async function addDemoProducts() {
+      const profile = JSON.parse(localStorage.getItem("profileCache") || "{}");
+      await seedDemoProducts(me, profile.block || "");
+      showToast("🌱 Sample products added!");
       loadMyProducts();
     }
   </script>

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VNeeds - Buy</title>
-  <link rel="stylesheet" href="./styles/main.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="dashboard" class="page active">
@@ -34,18 +34,26 @@
     </header>
 
     <aside>
-      <h3>Categories</h3>
-      <ul>
-        <li onclick="filterCategory('all')">All</li>
-        <li onclick="filterCategory('food')">🍜 Food</li>
-        <li onclick="filterCategory('clothes')">👕 Clothes</li>
-        <li onclick="filterCategory('cosmetics')">💄 Cosmetics</li>
-      </ul>
-      <h3>Your Block</h3>
-      <ul id="blockCategory"></ul>
-      <h3>Price</h3>
-      <input type="range" id="priceRange" min="0" max="500" step="10" oninput="filterByPrice()">
-      <span id="priceValue">500</span>
+      <div class="filter-section">
+        <h3 onclick="toggleSection(this)">Categories <span class="chevron">▾</span></h3>
+        <ul>
+          <li onclick="filterCategory('all')">All</li>
+          <li onclick="filterCategory('food')">🍜 Food</li>
+          <li onclick="filterCategory('clothes')">👕 Clothes</li>
+          <li onclick="filterCategory('cosmetics')">💄 Cosmetics</li>
+        </ul>
+      </div>
+      <div class="filter-section">
+        <h3 onclick="toggleSection(this)">Your Block <span class="chevron">▾</span></h3>
+        <ul id="blockCategory"></ul>
+      </div>
+      <div class="filter-section">
+        <h3 onclick="toggleSection(this)">Price <span class="chevron">▾</span></h3>
+        <div class="price-filter">
+          <input type="range" id="priceRange" min="0" max="500" step="10" oninput="filterByPrice()">
+          <span id="priceValue">500</span>
+        </div>
+      </div>
     </aside>
 
     <div id="sidebarOverlay" onclick="closeSidebar()"></div>
@@ -76,7 +84,8 @@
 
       <div class="payment-options">
         <button id="cashBtn">💵 Cash Payment</button>
-        <button id="upiBtn">💸 UPI / Online</button>
+        <button id="razorpayBtn">💳 Pay Online</button>
+        <button id="upiBtn">📲 UPI (Manual)</button>
       </div>
       <a id="upiDeepLink" href="#" rel="noopener noreferrer" style="display:none">Open UPI</a>
       <div id="upiChooser" style="display:none; margin-top:10px; font-size:14px;">
@@ -99,10 +108,12 @@
 
   <div id="toastContainer"></div>
 
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="js/firebase-config.js"></script>
+  <script src="js/razorpay-config.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/products.js"></script>
@@ -123,9 +134,17 @@
       if (profile.block) {
         document.getElementById("blockCategory").innerHTML =
           `<li onclick="filterByBlock('${profile.block}')">🏢 ${profile.block}</li>`;
+      } else {
+        document.getElementById("blockCategory").innerHTML =
+          `<li class="muted-item"><a href="block.html">📍 Set your block</a></li>`;
       }
 
-      wishlist = await getWishlist(user.uid);
+      try {
+        wishlist = await getWishlist(user.uid);
+      } catch (err) {
+        console.error("Failed to load wishlist:", err);
+        wishlist = [];
+      }
       showSkeletons(document.getElementById("productList"));
 
       unsubscribeProducts = watchProducts((products) => {
@@ -134,6 +153,10 @@
         loadProducts(blockMatches.length ? blockMatches : products);
       });
     });
+
+    function toggleSection(header) {
+      header.parentElement.classList.toggle("collapsed");
+    }
 
     function showPage(id) {
       document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
@@ -150,6 +173,7 @@
       const isWishlisted = wishlist.includes(p.id);
       return `
         <div class="product" style="animation-delay:${i * 0.05}s" onclick='openModal(${JSON.stringify(p).replace(/'/g, "&apos;")})'>
+          ${isNew(p) ? `<span class="new-badge">New</span>` : ""}
           <img src="${p.img}" loading="lazy">
           <h4>${p.name}</h4>
           <p>₹${p.price}</p>
@@ -159,19 +183,64 @@
         </div>`;
     }
 
+    let currentSort = "newest";
+    function sortProducts(list) {
+      const copy = [...list];
+      if (currentSort === "price_low") copy.sort((a, b) => a.price - b.price);
+      else if (currentSort === "price_high") copy.sort((a, b) => b.price - a.price);
+      else if (currentSort === "rating") copy.sort((a, b) => (b.avgRating || 0) - (a.avgRating || 0));
+      return copy;
+    }
+    function isNew(p) {
+      if (!p.createdAt || !p.createdAt.toDate) return false;
+      return (Date.now() - p.createdAt.toDate().getTime()) < 1000 * 60 * 60 * 48;
+    }
+    function onSortChange(val) { currentSort = val; loadProducts(currentProductList); }
+
     function loadProducts(list) {
       currentProductList = list;
       const container = document.getElementById("productList");
-      if (list.length === 0) { emptyState(container, "🔍", "No products found"); return; }
-      container.innerHTML = list.map(productCardHTML).join("");
+      const toolbar = `
+        <div class="toolbar">
+          <span>${list.length} item${list.length === 1 ? "" : "s"}</span>
+          <select onchange="onSortChange(this.value)">
+            <option value="newest" ${currentSort === "newest" ? "selected" : ""}>Newest first</option>
+            <option value="price_low" ${currentSort === "price_low" ? "selected" : ""}>Price: Low to High</option>
+            <option value="price_high" ${currentSort === "price_high" ? "selected" : ""}>Price: High to Low</option>
+            <option value="rating" ${currentSort === "rating" ? "selected" : ""}>Top Rated</option>
+          </select>
+        </div>`;
+      if (list.length === 0) {
+        container.innerHTML = toolbar;
+        const empty = document.createElement("div");
+        emptyState(empty, "🔍", allProducts.length === 0
+          ? `No products in the marketplace yet.`
+          : `No products found`);
+        if (allProducts.length === 0) {
+          empty.innerHTML += `<button onclick="addDemoProducts()" style="margin-top:10px;padding:10px 20px;border-radius:8px;border:none;background:var(--primary);color:#fff;font-weight:700;cursor:pointer;">🌱 Add Sample Products</button>`;
+        }
+        container.appendChild(empty);
+        return;
+      }
+      container.innerHTML = toolbar + sortProducts(list).map(productCardHTML).join("");
+    }
+
+    async function addDemoProducts() {
+      await seedDemoProducts(me, myProfile.block || "");
+      showToast("🌱 Sample products added!");
     }
 
     async function handleWishlistClick(e, id, el) {
       e.stopPropagation();
-      const nowActive = await toggleWishlistItem(me.uid, id);
-      wishlist = nowActive ? [...wishlist, id] : wishlist.filter(x => x !== id);
-      el.classList.toggle("active", nowActive);
-      showToast(nowActive ? "Added to wishlist" : "Removed from wishlist");
+      try {
+        const nowActive = await toggleWishlistItem(me.uid, id);
+        wishlist = nowActive ? [...wishlist, id] : wishlist.filter(x => x !== id);
+        el.classList.toggle("active", nowActive);
+        showToast(nowActive ? "Added to wishlist" : "Removed from wishlist");
+      } catch (err) {
+        console.error("Wishlist error:", err);
+        showToast("⚠ Couldn't update wishlist: " + err.message);
+      }
     }
 
     async function loadWishlistView() {
@@ -212,19 +281,55 @@
       document.getElementById("modalSeller").innerText = "Seller: " + p.sellerName + (p.block ? " | Block: " + p.block : "");
       document.getElementById("modalUpi").innerText = "UPI ID: " + (p.upi || "Not provided");
 
-      const cashBtn = document.getElementById("cashBtn"), upiBtn = document.getElementById("upiBtn");
+      const cashBtn = document.getElementById("cashBtn"), upiBtn = document.getElementById("upiBtn"), rzpBtn = document.getElementById("razorpayBtn");
       const isMine = p.sellerUid === me.uid;
       const disabled = p.status === "out" || isMine;
-      cashBtn.disabled = disabled; upiBtn.disabled = disabled;
+      [cashBtn, upiBtn, rzpBtn].forEach(b => b.disabled = disabled);
       cashBtn.innerText = isMine ? "This is your listing" : (p.status === "out" ? "🚫 Out of Stock" : "💵 Cash Payment");
       upiBtn.style.display = isMine || p.status === "out" ? "none" : "inline-block";
+      rzpBtn.style.display = isMine || p.status === "out" ? "none" : "inline-block";
 
       cashBtn.onclick = () => placeOrder(p, "cash");
       upiBtn.onclick = () => placeOrder(p, "upi");
+      rzpBtn.onclick = () => payWithRazorpay(p);
 
       document.getElementById("productModal").style.display = "flex";
       document.getElementById("productModal").setAttribute("aria-hidden", "false");
       document.body.style.overflow = "hidden";
+    }
+
+    function payWithRazorpay(p) {
+      if (!RAZORPAY_KEY_ID || RAZORPAY_KEY_ID.includes("XXXX")) {
+        showToast("⚠ Razorpay isn't set up yet — see js/razorpay-config.js");
+        return;
+      }
+      const rzp = new Razorpay({
+        key: RAZORPAY_KEY_ID,
+        amount: p.price * 100, // paise
+        currency: "INR",
+        name: "VNeeds",
+        description: p.name,
+        image: p.img,
+        prefill: { name: me.displayName || "", email: me.email },
+        theme: { color: "#5B4FE9" },
+        handler: async function (response) {
+          // NOTE: for a real production app, send response.razorpay_payment_id
+          // to a small backend/cloud function to verify the signature before
+          // trusting the payment. This client-only flow is fine for a
+          // college project / demo but should not be trusted for real money
+          // without that server-side check.
+          await createOrder(p, me, "razorpay");
+          showToast("✅ Payment successful! Order placed.");
+          closeModal();
+        },
+        modal: {
+          ondismiss: function () { showToast("Payment cancelled"); }
+        }
+      });
+      rzp.on("payment.failed", function (resp) {
+        showToast("❌ Payment failed: " + resp.error.description);
+      });
+      rzp.open();
     }
 
     async function placeOrder(p, method) {
