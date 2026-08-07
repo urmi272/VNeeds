@@ -12,7 +12,9 @@
 </p>
 
 <p align="center">
-  <a href="[(https://v-needs.vercel.app/)](https://v-needs.vercel.app/)"><strong>🔗 Live Demo</strong></a>
+  🔗<a href="https://v-needs.vercel.app/">
+    <strong>Live Demo</strong>
+  </a>
 </p>
 
 ---
