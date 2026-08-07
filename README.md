@@ -1,6 +1,6 @@
-<p align="center">
+<!-- <p align="center">
   <img src="./banner.png" alt="VNeeds Banner"/>
-</p>
+</p> -->
 
 <h1 align="center">🌐 VNeeds</h1>
 <p align="center"><strong>Turn your hostel needs into quick deals — anytime, anywhere.</strong></p>
@@ -12,7 +12,9 @@
 </p>
 
 <p align="center">
-  <a href="https://urmi272.github.io/VNeeds/"><strong>🔗 Live Demo</strong></a>
+  🔗<a href="https://v-needs.vercel.app/">
+    <strong>Live Demo</strong>
+  </a>
 </p>
 
 ---
