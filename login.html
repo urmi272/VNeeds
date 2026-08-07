@@ -30,6 +30,7 @@
       <input type="email" id="loginEmail" placeholder="College email">
       <input type="password" id="loginPassword" placeholder="Password">
       <button onclick="doLogin()">Log In</button>
+      <p class="switch-auth"><a onclick="showForgot()">Forgot password?</a></p>
       <p class="switch-auth">New here? <a onclick="showSignup()">Create an account</a></p>
     </div>
 
@@ -40,6 +41,16 @@
       <input type="password" id="signupPassword" placeholder="Password (min 6 characters)">
       <button onclick="doSignup()">Sign Up</button>
       <p class="switch-auth">Already have an account? <a onclick="showLogin()">Log in</a></p>
+    </div>
+
+    <div id="forgotBox" class="auth-box" style="display:none;">
+      <h2>Reset your password</h2>
+      <p style="font-size:14px;opacity:0.8;margin-bottom:10px;">
+        Enter your college email and we'll send you a link to reset your password.
+      </p>
+      <input type="email" id="forgotEmail" placeholder="College email">
+      <button onclick="doForgotPassword(this)">Send Reset Link</button>
+      <p class="switch-auth"><a onclick="showLogin()">Back to log in</a></p>
     </div>
 
     <p id="authError" class="auth-error"></p>
@@ -65,12 +76,22 @@
     function showSignup() {
       document.getElementById("loginBox").style.display = "none";
       document.getElementById("signupBox").style.display = "block";
+      document.getElementById("forgotBox").style.display = "none";
       document.getElementById("authError").innerText = "";
     }
     function showLogin() {
       document.getElementById("signupBox").style.display = "none";
+      document.getElementById("forgotBox").style.display = "none";
       document.getElementById("loginBox").style.display = "block";
       document.getElementById("authError").innerText = "";
+    }
+    function showForgot() {
+      document.getElementById("loginBox").style.display = "none";
+      document.getElementById("signupBox").style.display = "none";
+      document.getElementById("forgotBox").style.display = "block";
+      document.getElementById("authError").innerText = "";
+      // pre-fill with whatever they already typed on the login screen
+      document.getElementById("forgotEmail").value = document.getElementById("loginEmail").value.trim();
     }
 
     async function doLogin() {
@@ -97,6 +118,45 @@
         window.location.href = "block.html";
       } catch (err) {
         document.getElementById("authError").innerText = err.message;
+      }
+    }
+
+    async function doForgotPassword(btn) {
+      const email = document.getElementById("forgotEmail").value.trim();
+      document.getElementById("authError").innerText = "";
+
+      if (!email) {
+        document.getElementById("authError").innerText = "Please enter your email";
+        return;
+      }
+
+      btn.disabled = true;
+      const originalText = btn.innerText;
+      btn.innerText = "Sending...";
+
+      try {
+        await resetPassword(email);
+        showToast("📧 Reset link sent — check your inbox (and spam folder)");
+        document.getElementById("forgotBox").innerHTML = `
+          <h2>Check your email</h2>
+          <p style="font-size:14px;opacity:0.85;line-height:1.5;">
+            If an account exists for <strong>${email}</strong>, a password reset link is on its way.
+            Open it on this device to set a new password, then come back and log in.
+          </p>
+          <p class="switch-auth"><a onclick="showLogin()">Back to log in</a></p>
+        `;
+      } catch (err) {
+        btn.disabled = false;
+        btn.innerText = originalText;
+        // Firebase's own messages are already fairly user-friendly, e.g.
+        // "There is no user record corresponding to this identifier."
+        if (err.code === "auth/invalid-email") {
+          document.getElementById("authError").innerText = "That doesn't look like a valid email address";
+        } else if (err.code === "auth/user-not-found") {
+          document.getElementById("authError").innerText = "No account found with that email";
+        } else {
+          document.getElementById("authError").innerText = err.message;
+        }
       }
     }
   </script>

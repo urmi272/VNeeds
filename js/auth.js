@@ -26,6 +26,12 @@ async function logout() {
   await auth.signOut();
 }
 
+// Sends a password-reset email (Firebase-hosted link, no OTP/backend needed)
+async function resetPassword(email) {
+  if (!email) throw new Error("Please enter your email first");
+  await auth.sendPasswordResetEmail(email);
+}
+
 // Fetch (and cache in localStorage for instant UI) the user's profile doc
 async function getProfile(uid) {
   const snap = await db.collection("users").doc(uid).get();
