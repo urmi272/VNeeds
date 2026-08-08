@@ -22,6 +22,7 @@
   <link rel="preload" href="js/products.js" as="script">
   <link rel="preload" href="js/wishlist.js" as="script">
   <link rel="preload" href="js/orders.js" as="script">
+  <link rel="preload" href="js/chat.js" as="script">
   <link rel="preload" href="js/ratings.js" as="script">
   <link rel="preload" href="js/notifications.js" as="script">
 </head>
@@ -29,6 +30,7 @@
   <div id="slowLoadBanner" style="display:none;position:fixed;top:0;left:0;right:0;background:#ffdd57;color:#332b00;padding:10px 14px;text-align:center;font-family:sans-serif;font-size:14px;z-index:99999;">⏳ Taking longer than usual to load (this happens on slow mobile data) — <a href="javascript:location.reload()" style="color:#332b00;font-weight:700;">Tap to reload</a></div>
   <div id="dashboard" class="page active">
     <header>
+      <button class="mobile-toggle" onclick="toggleSidebar()" aria-label="Open menu">☰</button>
       <div class="logo"><img src="logo.png" alt="VNeeds Logo" class="logo-img"></div>
 
       <div class="search-container">
@@ -37,23 +39,27 @@
       </div>
 
       <div class="nav-actions">
-        <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
-        <a href="sell.html"><button>+ Sell</button></a>
-        <a href="myproducts.html"><button>📦 My Products</button></a>
-        <a href="orders.html"><button>🧾 Orders</button></a>
-        <button onclick="showPage('wishlistPage')">❤️ Wishlist</button>
+        <a class="nav-full-link" href="sell.html" title="Sell an item"><button class="btn-primary">➕<span class="nav-label">Sell</span></button></a>
+        <a class="nav-full-link" href="myproducts.html" title="My Products"><button>📦<span class="nav-label">My Products</span></button></a>
+        <a class="nav-full-link" href="orders.html" title="Orders"><button>🧾<span class="nav-label">Orders</span></button></a>
+        <button class="icon-btn" onclick="showPage('wishlistPage')" title="Wishlist" aria-label="Wishlist">❤️</button>
 
         <div class="notif-wrap">
-          <button id="notifBell">🔔<span id="notifBadge" class="notif-badge"></span></button>
+          <button id="notifBell" class="icon-btn" title="Notifications" aria-label="Notifications">🔔<span id="notifBadge" class="notif-badge"></span></button>
           <div id="notifDropdown" class="notif-dropdown"></div>
         </div>
 
-        <button id="darkToggle">🌙</button>
-        <button onclick="doLogout()">Logout</button>
+        <button id="darkToggle" class="icon-btn" title="Toggle dark mode" aria-label="Toggle dark mode">🌙</button>
+        <button class="icon-btn" onclick="doLogout()" title="Logout" aria-label="Logout">🚪</button>
       </div>
     </header>
 
     <aside>
+      <nav class="mobile-quick-nav">
+        <a href="sell.html">➕ Sell an item</a>
+        <a href="myproducts.html">📦 My Products</a>
+        <a href="orders.html">🧾 Orders</a>
+      </nav>
       <div class="filter-section">
         <h3 onclick="toggleSection(this)">Categories <span class="chevron">▾</span></h3>
         <ul>
@@ -67,13 +73,6 @@
         <h3 onclick="toggleSection(this)">Your Block <span class="chevron">▾</span></h3>
         <ul id="blockCategory"></ul>
       </div>
-      <div class="filter-section">
-        <h3 onclick="toggleSection(this)">Price <span class="chevron">▾</span></h3>
-        <div class="price-filter">
-          <input type="range" id="priceRange" min="0" max="500" step="10" oninput="filterByPrice()">
-          <span id="priceValue">500</span>
-        </div>
-      </div>
     </aside>
 
     <div id="sidebarOverlay" onclick="closeSidebar()"></div>
@@ -83,10 +82,10 @@
 
   <div id="wishlistPage" class="page">
     <header>
-      <div class="logo"><span style="color:var(--color2)">VNeeds</span></div>
-      <div><button onclick="showPage('dashboard')">⬅ Back</button></div>
+      <div class="logo"><img src="logo.png" alt="VNeeds Logo" class="logo-img"></div>
+      <div class="nav-actions"><button onclick="showPage('dashboard')">⬅ Back</button></div>
     </header>
-    <h2>Your Wishlist ❤️</h2>
+    <h2 style="text-align:center;">Your Wishlist ❤️</h2>
     <div id="wishlistList" class="wishlist-container"></div>
   </div>
 
@@ -102,9 +101,11 @@
       <p id="modalSeller"></p>
       <p id="modalUpi"></p>
 
+      <button id="chatSellerBtn" class="chat-cta" onclick="openProductChat()">💬 Chat with Seller</button>
+
+      <div class="payment-options-label">Choose a payment method</div>
       <div class="payment-options">
         <button id="cashBtn">💵 Cash Payment</button>
-        <button id="razorpayBtn">💳 Pay Online</button>
         <button id="upiBtn">📲 UPI (Manual)</button>
       </div>
       <a id="upiDeepLink" href="#" rel="noopener noreferrer" style="display:none">Open UPI</a>
@@ -126,20 +127,34 @@
     </div>
   </div>
 
+  <!-- Pre-purchase chat modal -->
+  <div id="productChatModal" class="modal" aria-hidden="true" role="dialog">
+    <div class="modal-content chat-modal" role="document">
+      <button class="close-btn" onclick="closeProductChat()" aria-label="Close chat">×</button>
+      <h3 id="productChatTitle"></h3>
+      <p id="productChatMeta" class="rating-line muted"></p>
+
+      <div id="productChatMessages" class="chat-messages"></div>
+      <div class="chat-input-row">
+        <input type="text" id="productChatInput" placeholder="Ask about size, condition, pickup...">
+        <button onclick="sendProductChatMessage()">Send</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toastContainer"></div>
 
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="js/firebase-config.js"></script>
   <script>clearTimeout(window.__vneedsLoadTimer); var __b = document.getElementById("slowLoadBanner"); if (__b) __b.style.display = "none";</script>
-  <script src="js/razorpay-config.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/products.js"></script>
   <script src="js/wishlist.js"></script>
   <script src="js/orders.js"></script>
+  <script src="js/chat.js"></script>
   <script src="js/ratings.js"></script>
   <script src="js/notifications.js"></script>
 
@@ -147,6 +162,7 @@
     initDarkMode();
     let me = null, myProfile = null, allProducts = [], wishlist = [];
     let currentProductList = [], currentProductIndex = -1, unsubscribeProducts = null;
+    let currentProduct = null, unsubProductChat = null;
 
     requireAuth(async (user, profile) => {
       me = user; myProfile = profile;
@@ -284,15 +300,10 @@
       loadProducts(allProducts.filter(p => p.block === block));
       if (window.innerWidth <= 768) closeSidebar();
     }
-    function filterByPrice() {
-      const max = document.getElementById("priceRange").value;
-      document.getElementById("priceValue").innerText = max;
-      loadProducts(allProducts.filter(p => p.price <= max));
-      if (window.innerWidth <= 768) closeSidebar();
-    }
 
     // ----- Modal / order / rating flow -----
     function openModal(p) {
+      currentProduct = p;
       currentProductIndex = currentProductList.findIndex(x => x.id === p.id);
       document.getElementById("modalImg").src = p.img;
       document.getElementById("modalName").innerText = p.name;
@@ -302,55 +313,21 @@
       document.getElementById("modalSeller").innerText = "Seller: " + p.sellerName + (p.block ? " | Block: " + p.block : "");
       document.getElementById("modalUpi").innerText = "UPI ID: " + (p.upi || "Not provided");
 
-      const cashBtn = document.getElementById("cashBtn"), upiBtn = document.getElementById("upiBtn"), rzpBtn = document.getElementById("razorpayBtn");
       const isMine = p.sellerUid === me.uid;
+      document.getElementById("chatSellerBtn").style.display = isMine ? "none" : "block";
+
+      const cashBtn = document.getElementById("cashBtn"), upiBtn = document.getElementById("upiBtn");
       const disabled = p.status === "out" || isMine;
-      [cashBtn, upiBtn, rzpBtn].forEach(b => b.disabled = disabled);
+      [cashBtn, upiBtn].forEach(b => b.disabled = disabled);
       cashBtn.innerText = isMine ? "This is your listing" : (p.status === "out" ? "🚫 Out of Stock" : "💵 Cash Payment");
       upiBtn.style.display = isMine || p.status === "out" ? "none" : "inline-block";
-      rzpBtn.style.display = isMine || p.status === "out" ? "none" : "inline-block";
 
       cashBtn.onclick = () => placeOrder(p, "cash");
       upiBtn.onclick = () => placeOrder(p, "upi");
-      rzpBtn.onclick = () => payWithRazorpay(p);
 
       document.getElementById("productModal").style.display = "flex";
       document.getElementById("productModal").setAttribute("aria-hidden", "false");
       document.body.style.overflow = "hidden";
-    }
-
-    function payWithRazorpay(p) {
-      if (!RAZORPAY_KEY_ID || RAZORPAY_KEY_ID.includes("XXXX")) {
-        showToast("⚠ Razorpay isn't set up yet — see js/razorpay-config.js");
-        return;
-      }
-      const rzp = new Razorpay({
-        key: RAZORPAY_KEY_ID,
-        amount: p.price * 100, // paise
-        currency: "INR",
-        name: "VNeeds",
-        description: p.name,
-        image: p.img,
-        prefill: { name: me.displayName || "", email: me.email },
-        theme: { color: "#5B4FE9" },
-        handler: async function (response) {
-          // NOTE: for a real production app, send response.razorpay_payment_id
-          // to a small backend/cloud function to verify the signature before
-          // trusting the payment. This client-only flow is fine for a
-          // college project / demo but should not be trusted for real money
-          // without that server-side check.
-          await createOrder(p, me, "razorpay");
-          showToast("✅ Payment successful! Order placed.");
-          closeModal();
-        },
-        modal: {
-          ondismiss: function () { showToast("Payment cancelled"); }
-        }
-      });
-      rzp.on("payment.failed", function (resp) {
-        showToast("❌ Payment failed: " + resp.error.description);
-      });
-      rzp.open();
     }
 
     async function placeOrder(p, method) {
@@ -391,6 +368,60 @@
       else showToast("🚫 Already at first product");
     }
 
+    // ----- Pre-purchase chat -----
+    async function openProductChat() {
+      if (!currentProduct) return;
+      try {
+        const conv = await getOrCreateConversation(currentProduct, me);
+        conv._otherUid = currentProduct.sellerUid;
+
+        document.getElementById("productChatTitle").innerText = currentProduct.name;
+        document.getElementById("productChatMeta").innerText = "Chatting with " + currentProduct.sellerName;
+        window.__activeProductChat = conv;
+
+        if (unsubProductChat) unsubProductChat();
+        unsubProductChat = watchConvMessages(conv.id, renderProductChatMessages, (err) => {
+          console.error("Chat listener error:", err);
+          showToast("⚠ Couldn't load messages: " + err.message);
+        });
+
+        document.getElementById("productChatModal").style.display = "flex";
+        document.getElementById("productChatModal").setAttribute("aria-hidden", "false");
+      } catch (err) {
+        console.error("Couldn't open chat:", err);
+        showToast("⚠ Couldn't start chat: " + err.message);
+      }
+    }
+
+    function renderProductChatMessages(messages) {
+      const box = document.getElementById("productChatMessages");
+      box.innerHTML = messages.length ? messages.map(m => `
+        <div class="chat-bubble ${m.senderUid === me.uid ? 'mine' : ''}">
+          <span class="chat-sender">${m.senderUid === me.uid ? 'You' : m.senderName}</span>${m.text}
+        </div>`).join("") : `<p class="rating-line muted" style="text-align:center;">Ask about size, condition, pickup time, or anything else 👋</p>`;
+      box.scrollTop = box.scrollHeight;
+    }
+
+    async function sendProductChatMessage() {
+      const input = document.getElementById("productChatInput");
+      const text = input.value.trim();
+      const conv = window.__activeProductChat;
+      if (!text || !conv) return;
+      try {
+        await sendConvMessage(conv.id, me, text, conv._otherUid, conv.productName);
+        input.value = "";
+      } catch (err) {
+        console.error("Couldn't send message:", err);
+        showToast("⚠ Message didn't send: " + err.message);
+      }
+    }
+
+    function closeProductChat() {
+      if (unsubProductChat) unsubProductChat();
+      document.getElementById("productChatModal").style.display = "none";
+      document.getElementById("productChatModal").setAttribute("aria-hidden", "true");
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("modalCloseBtn").addEventListener("click", closeModal);
       document.getElementById("productModal").addEventListener("click", (e) => {
@@ -403,6 +434,13 @@
         if (e.key === "Escape") closeModal();
         else if (e.key === "ArrowLeft") prevProduct();
         else if (e.key === "ArrowRight") nextProduct();
+      });
+
+      document.getElementById("productChatModal").addEventListener("click", (e) => {
+        if (e.target.id === "productChatModal") closeProductChat();
+      });
+      document.getElementById("productChatInput").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") sendProductChatMessage();
       });
     });
   </script>

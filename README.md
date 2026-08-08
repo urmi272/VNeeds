@@ -42,7 +42,7 @@ We ([@urmi272](https://github.com/urmi272) & [@anjalisevkani](https://github.com
 - ⭐ **Ratings & reviews** — rate a seller once an order is completed
 - 🔔 **Notifications** — get pinged on new orders, confirmations, and messages
 - ❤️ **Wishlist** that follows you across devices
-- 💳 **Online payments** via Razorpay (cards, UPI, netbanking, wallets), plus a manual UPI QR/deep-link fallback and cash option
+- 💳 **Payments** — cash on pickup, or a manual UPI QR/deep-link handoff between buyer and seller
 - 🔍 **Search, category, and price filters**
 - 🌙 **Dark mode**
 - 📱 **Fully responsive** — works on mobile and desktop
@@ -57,7 +57,7 @@ We ([@urmi272](https://github.com/urmi272) & [@anjalisevkani](https://github.com
 | Frontend | HTML5, CSS3 (custom design system, CSS Grid), Vanilla JavaScript |
 | Auth | Firebase Authentication (email/password) |
 | Database | Cloud Firestore (real-time listeners for products, orders, chat, notifications) |
-| Payments | Razorpay Checkout |
+| Payments | Cash on pickup + manual UPI (QR / deep link) |
 | Hosting | GitHub Pages |
 
 ---
@@ -90,8 +90,7 @@ This is a static site with no build step — but it needs a free Firebase projec
 3. Create a **Firestore Database** (test mode to start)
 4. Copy your web app config into `js/firebase-config.js`
 5. Publish the security rules in `firestore.rules.txt` under Firestore → Rules
-6. (Optional) Add a free [Razorpay](https://dashboard.razorpay.com/signup) test key to `js/razorpay-config.js` for online payments
-7. Open `index.html` in a browser, or serve the folder with any static server (e.g. VS Code's Live Server extension)
+6. Open `index.html` in a browser, or serve the folder with any static server (e.g. VS Code's Live Server extension)
 
 ---
 

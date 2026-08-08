@@ -44,5 +44,32 @@ service cloud.firestore {
            get(/databases/$(database)/documents/orders/$(orderId)).data.sellerUid == request.auth.uid);
       }
     }
+
+    // Pre-purchase chat — lets a buyer message a seller before any order
+    // exists. Doc id is deterministic ("<productId>_<buyerUid>"), so this
+    // rule doubles as the check that a buyer can only ever create/read
+    // their own thread for a given product.
+    match /conversations/{conversationId} {
+      // "get" must also succeed for a conversation that doesn't exist yet —
+      // that's how the app checks whether to create one. Accessing
+      // resource.data on a non-existent doc throws, so the !exists() check
+      // has to come first and short-circuit before touching resource.data.
+      allow get: if signedIn() && (
+        !exists(/databases/$(database)/documents/conversations/$(conversationId)) ||
+        resource.data.buyerUid == request.auth.uid ||
+        resource.data.sellerUid == request.auth.uid
+      );
+      allow list: if signedIn() &&
+        (resource.data.buyerUid == request.auth.uid || resource.data.sellerUid == request.auth.uid);
+      allow create: if signedIn() &&
+        request.resource.data.buyerUid == request.auth.uid &&
+        conversationId == (request.resource.data.productId + '_' + request.auth.uid);
+
+      match /messages/{msgId} {
+        allow read, create: if signedIn() &&
+          (get(/databases/$(database)/documents/conversations/$(conversationId)).data.buyerUid == request.auth.uid ||
+           get(/databases/$(database)/documents/conversations/$(conversationId)).data.sellerUid == request.auth.uid);
+      }
+    }
   }
 }

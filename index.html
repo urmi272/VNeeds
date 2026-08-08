@@ -19,19 +19,34 @@
   <link rel="preload" href="js/firebase-config.js" as="script">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
   <div id="slowLoadBanner" style="display:none;position:fixed;top:0;left:0;right:0;background:#ffdd57;color:#332b00;padding:10px 14px;text-align:center;font-family:sans-serif;font-size:14px;z-index:99999;">⏳ Taking longer than usual to load (this happens on slow mobile data) — <a href="javascript:location.reload()" style="color:#332b00;font-weight:700;">Tap to reload</a></div>
   <div id="landing" class="page active">
-    <div class="logo">
+    <div class="landing-card">
       <img src="logo.png" alt="VNeeds Logo" class="logo-img">
-    </div>
-    <h1>Welcome to VNeeds</h1>
-    <p>Turn your hostel needs into quick deals - anytime, anywhere.</p>
-    <div class="options">
-      <button onclick="goBuy()">Buy</button>
-      <button onclick="goSell()">Sell</button>
+      <h1>Turn hostel needs into quick deals</h1>
+      <p class="tagline">Buy and sell with students in your own block — anytime, anywhere.</p>
+
+      <div class="action-tiles">
+        <button class="action-tile buy" onclick="goBuy()">
+          <span class="tile-icon">🛍️</span>
+          <span class="tile-title">Buy</span>
+          <span class="tile-sub">Browse what's available near you</span>
+        </button>
+        <button class="action-tile sell" onclick="goSell()">
+          <span class="tile-icon">🏷️</span>
+          <span class="tile-title">Sell</span>
+          <span class="tile-sub">List an item in under a minute</span>
+        </button>
+      </div>
+
+      <div class="trust-strip">
+        <span>🏢 Block-based discovery</span>
+        <span>💬 Chat with sellers</span>
+        <span>💵 Cash or UPI</span>
+      </div>
     </div>
   </div>
 
