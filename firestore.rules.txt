@@ -14,7 +14,21 @@ service cloud.firestore {
 
       match /notifications/{notifId} {
         allow read, update: if signedIn() && request.auth.uid == uid;
-        allow create: if signedIn(); // any signed-in user can notify another
+        // Any signed-in user can notify another (order updates, chat pings come
+        // from the other party in the deal) — but the payload itself is
+        // constrained so this can't be turned into a spam/phishing vector:
+        // bounded text, and "link" can only be a local page, never an
+        // absolute URL or a javascript: URI. The app also HTML-escapes
+        // n.text before rendering it (see js/ui.js) as defense in depth.
+        allow create: if signedIn()
+          && request.resource.data.keys().hasOnly(['text', 'link', 'read', 'createdAt'])
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 300
+          && request.resource.data.read == false
+          && (!('link' in request.resource.data) || request.resource.data.link == null ||
+              (request.resource.data.link is string &&
+               request.resource.data.link.size() <= 100 &&
+               !request.resource.data.link.matches('.*(://|javascript:|data:).*')));
       }
     }
 
@@ -24,12 +38,37 @@ service cloud.firestore {
 
     match /products/{productId} {
       allow read: if true;
-      allow create: if signedIn() && request.resource.data.sellerUid == request.auth.uid;
-      allow update, delete: if signedIn() && resource.data.sellerUid == request.auth.uid;
+      allow create: if signedIn() && request.resource.data.sellerUid == request.auth.uid
+        && request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 100
+        && request.resource.data.desc is string && request.resource.data.desc.size() <= 1000
+        && request.resource.data.price is number && request.resource.data.price > 0;
+
+      // Owners can change anything on their own listing. Anyone else signed in
+      // may ONLY flip status "in" -> "out", and only that field — this is what
+      // lets a buyer's order-creation transaction atomically reserve the item
+      // (see createOrder() in js/orders.js) without giving strangers any other
+      // write access to someone else's listing. A malicious client could abuse
+      // this to mark someone's item falsely "out of stock", but the seller can
+      // immediately flip it back from My Products — real stock-locking would
+      // need a Cloud Function, which this static-hosting setup doesn't have.
+      allow update: if signedIn() && (
+        resource.data.sellerUid == request.auth.uid ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']) &&
+         resource.data.status == 'in' && request.resource.data.status == 'out')
+      );
+      allow delete: if signedIn() && resource.data.sellerUid == request.auth.uid;
 
       match /ratings/{buyerUid} {
         allow read: if true;
-        allow write: if signedIn() && request.auth.uid == buyerUid;
+        // A rating must reference a real order: that order has to belong to
+        // this buyer, be for this exact product, and be marked completed —
+        // otherwise anyone signed in could rate any listing without ever
+        // buying it.
+        allow write: if signedIn() && request.auth.uid == buyerUid
+          && request.resource.data.orderId is string
+          && get(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.buyerUid == request.auth.uid
+          && get(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.productId == productId
+          && get(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.status == 'completed';
       }
     }
 

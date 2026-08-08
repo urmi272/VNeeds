@@ -28,11 +28,15 @@
     <div class="logo"><img src="logo.png" alt="VNeeds Logo" class="logo-img"></div>
     <div class="nav-actions">
       <a href="buy.html"><button>⬅ Back</button></a>
+      <a href="profile.html"><button class="icon-btn" title="Profile" aria-label="Profile">👤</button></a>
       <button class="icon-btn" onclick="doLogout()" title="Logout" aria-label="Logout">🚪</button>
     </div>
   </header>
 
   <h2 style="text-align:center;">My Products</h2>
+  <p style="text-align:center; font-size:13px; color:var(--text-muted); margin:-8px 0 16px;">
+    Sold listings are automatically removed a week after the order is marked completed.
+  </p>
   <div style="text-align:center; margin-bottom:16px;">
     <button onclick="addDemoProducts()" style="padding:10px 20px;border-radius:8px;border:none;background:var(--primary);color:#fff;font-weight:700;cursor:pointer;">🌱 Add Sample Products</button>
   </div>
@@ -57,6 +61,12 @@
     requireAuth(async (user) => {
       me = user;
       showSkeletons(document.getElementById("myProductList"), 3);
+      try {
+        const removed = await cleanupOldCompletedProducts(user.uid);
+        if (removed) showToast(`🧹 Removed ${removed} listing${removed === 1 ? "" : "s"} completed over a week ago`);
+      } catch (err) {
+        console.error("Cleanup failed:", err);
+      }
       await loadMyProducts();
     });
 
@@ -69,9 +79,9 @@
 
       container.innerHTML = mine.map(p => `
         <div class="product">
-          <img src="${p.img}">
-          <h4>${p.name}</h4>
-          <p>₹${p.price}</p>
+          <img src="${safeImageSrc(p.img)}">
+          <h4>${escapeHtml(p.name)}</h4>
+          <p>₹${Number(p.price) || 0}</p>
           ${p.ratingCount ? `<p class="rating-line">${starString(p.avgRating)} (${p.ratingCount})</p>` : `<p class="rating-line muted">No ratings yet</p>`}
           <p class="stock-badge ${p.status === 'out' ? 'out' : 'in'}">${p.status === "out" ? "🚫 Out of Stock" : "✅ Available"}</p>
           <div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap; justify-content:center;">

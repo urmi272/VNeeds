@@ -43,6 +43,7 @@
         <a class="nav-full-link" href="myproducts.html" title="My Products"><button>📦<span class="nav-label">My Products</span></button></a>
         <a class="nav-full-link" href="orders.html" title="Orders"><button>🧾<span class="nav-label">Orders</span></button></a>
         <button class="icon-btn" onclick="showPage('wishlistPage')" title="Wishlist" aria-label="Wishlist">❤️</button>
+        <a class="nav-full-link" href="profile.html" title="Profile"><button class="icon-btn">👤<span class="nav-label">Profile</span></button></a>
 
         <div class="notif-wrap">
           <button id="notifBell" class="icon-btn" title="Notifications" aria-label="Notifications">🔔<span id="notifBadge" class="notif-badge"></span></button>
@@ -59,6 +60,7 @@
         <a href="sell.html">➕ Sell an item</a>
         <a href="myproducts.html">📦 My Products</a>
         <a href="orders.html">🧾 Orders</a>
+        <a href="profile.html">👤 Profile</a>
       </nav>
       <div class="filter-section">
         <h3 onclick="toggleSection(this)">Categories <span class="chevron">▾</span></h3>
@@ -106,7 +108,7 @@
       <div class="payment-options-label">Choose a payment method</div>
       <div class="payment-options">
         <button id="cashBtn">💵 Cash Payment</button>
-        <button id="upiBtn">📲 UPI (Manual)</button>
+        <button id="upiBtn">📲 Pay withUPI</button>
       </div>
       <a id="upiDeepLink" href="#" rel="noopener noreferrer" style="display:none">Open UPI</a>
       <div id="upiChooser" style="display:none; margin-top:10px; font-size:14px;">
@@ -170,7 +172,7 @@
 
       if (profile.block) {
         document.getElementById("blockCategory").innerHTML =
-          `<li onclick="filterByBlock('${profile.block}')">🏢 ${profile.block}</li>`;
+          `<li onclick="filterByBlock('${profile.block.replace(/'/g, "\\'")}')">🏢 ${escapeHtml(profile.block)}</li>`;
       } else {
         document.getElementById("blockCategory").innerHTML =
           `<li class="muted-item"><a href="block.html">📍 Set your block</a></li>`;
@@ -211,9 +213,9 @@
       return `
         <div class="product" style="animation-delay:${i * 0.05}s" onclick='openModal(${JSON.stringify(p).replace(/'/g, "&apos;")})'>
           ${isNew(p) ? `<span class="new-badge">New</span>` : ""}
-          <img src="${p.img}" loading="lazy">
-          <h4>${p.name}</h4>
-          <p>₹${p.price}</p>
+          <img src="${safeImageSrc(p.img)}" loading="lazy">
+          <h4>${escapeHtml(p.name)}</h4>
+          <p>₹${Number(p.price) || 0}</p>
           ${p.ratingCount ? `<p class="rating-line">${starString(p.avgRating)} (${p.ratingCount})</p>` : `<p class="rating-line muted">No ratings yet</p>`}
           ${p.status === "out" ? `<p class="stock-badge out">🚫 Out of Stock</p>` : `<p class="stock-badge in">✅ Available</p>`}
           <span class="wishlist ${isWishlisted ? 'active' : ''}" onclick="handleWishlistClick(event, '${p.id}', this)">♥</span>
@@ -305,11 +307,11 @@
     function openModal(p) {
       currentProduct = p;
       currentProductIndex = currentProductList.findIndex(x => x.id === p.id);
-      document.getElementById("modalImg").src = p.img;
+      document.getElementById("modalImg").src = safeImageSrc(p.img);
       document.getElementById("modalName").innerText = p.name;
       document.getElementById("modalRating").innerText = p.ratingCount ? `${starString(p.avgRating)} (${p.ratingCount} ratings)` : "No ratings yet";
       document.getElementById("modalPrice").innerText = "₹" + p.price;
-      document.getElementById("modalDesc").innerHTML = `${p.desc}<br><strong>Status:</strong> ${p.status === "out" ? "🚫 Out of Stock" : "✅ Available"}`;
+      document.getElementById("modalDesc").innerHTML = `${escapeHtml(p.desc)}<br><strong>Status:</strong> ${p.status === "out" ? "🚫 Out of Stock" : "✅ Available"}`;
       document.getElementById("modalSeller").innerText = "Seller: " + p.sellerName + (p.block ? " | Block: " + p.block : "");
       document.getElementById("modalUpi").innerText = "UPI ID: " + (p.upi || "Not provided");
 
@@ -331,6 +333,14 @@
     }
 
     async function placeOrder(p, method) {
+      try {
+        await createOrder(p, me, method);
+      } catch (err) {
+        console.error("Couldn't place order:", err);
+        showToast("⚠ " + err.message);
+        closeModal();
+        return;
+      }
       if (method === "upi" && p.upi) {
         const upiUrl = `upi://pay?pa=${encodeURIComponent(p.upi)}&pn=${encodeURIComponent(p.sellerName)}&am=${encodeURIComponent(p.price)}&cu=INR`;
         const a = document.getElementById("upiDeepLink");
@@ -350,7 +360,6 @@
       } else {
         showToast("💵 Pay in cash when you meet the seller.");
       }
-      await createOrder(p, me, method);
       showToast("🧾 Order placed! Track it in Orders.");
     }
 
@@ -397,7 +406,7 @@
       const box = document.getElementById("productChatMessages");
       box.innerHTML = messages.length ? messages.map(m => `
         <div class="chat-bubble ${m.senderUid === me.uid ? 'mine' : ''}">
-          <span class="chat-sender">${m.senderUid === me.uid ? 'You' : m.senderName}</span>${m.text}
+          <span class="chat-sender">${m.senderUid === me.uid ? 'You' : escapeHtml(m.senderName)}</span>${escapeHtml(m.text)}
         </div>`).join("") : `<p class="rating-line muted" style="text-align:center;">Ask about size, condition, pickup time, or anything else 👋</p>`;
       box.scrollTop = box.scrollHeight;
     }

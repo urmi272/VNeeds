@@ -68,28 +68,32 @@
   <script>
     initDarkMode();
 
-    // If already logged in, skip straight to the app
+    // If already logged in, skip straight to the app — block selection if they
+    // haven't picked a hostel block yet, otherwise straight to the app.
     auth.onAuthStateChanged(user => {
-      if (user) window.location.href = "buy.html";
+      if (user) goToApp(user);
     });
 
-    function showSignup() {
-      document.getElementById("loginBox").style.display = "none";
-      document.getElementById("signupBox").style.display = "block";
-      document.getElementById("forgotBox").style.display = "none";
+    async function goToApp(user) {
+      try {
+        const profile = await getProfile(user.uid);
+        window.location.href = profile && profile.block ? "buy.html" : "block.html";
+      } catch {
+        window.location.href = "buy.html";
+      }
+    }
+
+    function hideAllBoxes() {
+      ["loginBox", "signupBox", "forgotBox"].forEach(id => {
+        document.getElementById(id).style.display = "none";
+      });
       document.getElementById("authError").innerText = "";
     }
-    function showLogin() {
-      document.getElementById("signupBox").style.display = "none";
-      document.getElementById("forgotBox").style.display = "none";
-      document.getElementById("loginBox").style.display = "block";
-      document.getElementById("authError").innerText = "";
-    }
+    function showSignup() { hideAllBoxes(); document.getElementById("signupBox").style.display = "block"; }
+    function showLogin() { hideAllBoxes(); document.getElementById("loginBox").style.display = "block"; }
     function showForgot() {
-      document.getElementById("loginBox").style.display = "none";
-      document.getElementById("signupBox").style.display = "none";
+      hideAllBoxes();
       document.getElementById("forgotBox").style.display = "block";
-      document.getElementById("authError").innerText = "";
       // pre-fill with whatever they already typed on the login screen
       document.getElementById("forgotEmail").value = document.getElementById("loginEmail").value.trim();
     }
@@ -98,8 +102,8 @@
       const email = document.getElementById("loginEmail").value.trim();
       const password = document.getElementById("loginPassword").value;
       try {
-        await login(email, password);
-        window.location.href = "buy.html";
+        const user = await login(email, password);
+        await goToApp(user);
       } catch (err) {
         document.getElementById("authError").innerText = err.message;
       }
@@ -114,7 +118,7 @@
         return;
       }
       try {
-        await signup(email, password, name);
+        const user = await signup(email, password, name);
         window.location.href = "block.html";
       } catch (err) {
         document.getElementById("authError").innerText = err.message;
@@ -140,7 +144,7 @@
         document.getElementById("forgotBox").innerHTML = `
           <h2>Check your email</h2>
           <p style="font-size:14px;opacity:0.85;line-height:1.5;">
-            If an account exists for <strong>${email}</strong>, a password reset link is on its way.
+            If an account exists for <strong>${escapeHtml(email)}</strong>, a password reset link is on its way.
             Open it on this device to set a new password, then come back and log in.
           </p>
           <p class="switch-auth"><a onclick="showLogin()">Back to log in</a></p>

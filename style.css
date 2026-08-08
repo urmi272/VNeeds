@@ -569,6 +569,19 @@ main#productList, #myProductList, .order-list {
 }
 
 /* ============================================================
+   PROFILE PAGE
+   ============================================================ */
+.profile-avatar {
+  width: 64px; height: 64px; margin: 0 auto;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 26px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+#sellForm input:disabled { opacity: 0.65; cursor: not-allowed; }
+
+/* ============================================================
    MODAL
    ============================================================ */
 .modal {

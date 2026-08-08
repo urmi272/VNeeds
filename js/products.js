@@ -109,3 +109,52 @@ function watchProducts(onChange) {
     onChange(snap.docs.map(d => ({ id: d.id, ...d.data() })));
   });
 }
+
+// ===== Weekly auto-cleanup of completed listings =====
+// This is a static site with no server/cron, so there's no way to run this on
+// an actual schedule in the background. Instead it runs "lazily": whenever a
+// seller opens My Products, we check (at most once a day, via the localStorage
+// guard below) whether any of their own listings have been sold and sitting
+// completed for 7+ days, and delete those. A listing only ever gets deleted
+// if it still belongs to the current user and is still marked "out" (i.e. the
+// seller hasn't relisted it in the meantime).
+const CLEANUP_THROTTLE_MS = 24 * 60 * 60 * 1000; // re-check at most once/day
+const CLEANUP_AGE_MS = 7 * 24 * 60 * 60 * 1000;  // delete once completed 7+ days
+
+async function cleanupOldCompletedProducts(uid, { force = false } = {}) {
+  const throttleKey = `vneeds_lastCleanup_${uid}`;
+  const last = parseInt(localStorage.getItem(throttleKey) || "0", 10);
+  if (!force && Date.now() - last < CLEANUP_THROTTLE_MS) return 0;
+  localStorage.setItem(throttleKey, String(Date.now()));
+
+  const cutoff = Date.now() - CLEANUP_AGE_MS;
+  const snap = await db.collection("orders")
+    .where("sellerUid", "==", uid)
+    .where("status", "==", "completed")
+    .get();
+
+  const staleProductIds = new Set();
+  snap.docs.forEach(d => {
+    const o = d.data();
+    if (o.productId && o.completedAt && o.completedAt.toDate &&
+        o.completedAt.toDate().getTime() < cutoff) {
+      staleProductIds.add(o.productId);
+    }
+  });
+  if (!staleProductIds.size) return 0;
+
+  const batch = db.batch();
+  let count = 0;
+  for (const pid of staleProductIds) {
+    const pRef = productsCol.doc(pid);
+    const pSnap = await pRef.get();
+    // Only delete if it's still this seller's product and still "out" —
+    // guards against deleting something the seller relisted since the sale.
+    if (pSnap.exists && pSnap.data().sellerUid === uid && pSnap.data().status === "out") {
+      batch.delete(pRef);
+      count++;
+    }
+  }
+  if (count) await batch.commit();
+  return count;
+}

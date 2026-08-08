@@ -1,5 +1,31 @@
 // ===== Shared UI: toast, dark mode, sidebar, notification bell =====
 
+// ---- XSS defense: escape any user-supplied text before it goes into innerHTML ----
+// Product names/descriptions, chat messages, notification text, display names, etc.
+// are all attacker-controlled (any signed-in user can set them), so every one of
+// them MUST go through this before being placed in an HTML string. Values placed
+// via .innerText / .textContent do NOT need this — the DOM already escapes those.
+function escapeHtml(str) {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// Product/user images are always meant to be data: URLs (produced by resizeImage()
+// or seedDemoProducts()) — never remote URLs. Rejecting anything else blocks
+// javascript:/vbscript: src tricks and stray HTML in an "image" field.
+function safeImageSrc(src) {
+  return typeof src === "string" && /^data:image\//i.test(src)
+    ? src
+    : "data:image/svg+xml;utf8," + encodeURIComponent(
+        `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><rect width='100%' height='100%' fill='#EDEBFF'/></svg>`
+      );
+}
+
 function showToast(message) {
   let container = document.getElementById("toastContainer");
   if (!container) return;
@@ -69,8 +95,8 @@ function initNotificationBell(uid) {
 
     dropdown.innerHTML = notifs.length
       ? notifs.map(n => `
-          <div class="notif-item ${n.read ? "" : "unread"}" data-id="${n.id}" data-link="${n.link || ""}">
-            ${n.text}
+          <div class="notif-item ${n.read ? "" : "unread"}" data-id="${escapeHtml(n.id)}" data-link="${escapeHtml(n.link || "")}">
+            ${escapeHtml(n.text)}
           </div>`).join("")
       : `<div class="notif-item">No notifications yet</div>`;
 

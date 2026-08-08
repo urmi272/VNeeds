@@ -30,6 +30,7 @@
     <div class="logo"><img src="logo.png" alt="VNeeds Logo" class="logo-img"></div>
     <div class="nav-actions">
       <a href="buy.html"><button>⬅ Back</button></a>
+      <a href="profile.html"><button class="icon-btn" title="Profile" aria-label="Profile">👤</button></a>
       <div class="notif-wrap">
         <button id="notifBell" class="icon-btn" title="Notifications" aria-label="Notifications">🔔<span id="notifBadge" class="notif-badge"></span></button>
         <div id="notifDropdown" class="notif-dropdown"></div>
@@ -114,10 +115,10 @@
       const other = o.role === "buyer" ? o.sellerName : o.buyerName;
       return `
         <div class="product order-card" onclick='openChat(${JSON.stringify(o).replace(/'/g, "&apos;")})'>
-          <img src="${o.productImg}">
-          <h4>${o.productName}</h4>
-          <p>₹${o.price} · ${o.paymentMethod.toUpperCase()}</p>
-          <p class="rating-line muted">${o.role === "buyer" ? "Seller" : "Buyer"}: ${other}</p>
+          <img src="${safeImageSrc(o.productImg)}">
+          <h4>${escapeHtml(o.productName)}</h4>
+          <p>₹${Number(o.price) || 0} · ${escapeHtml((o.paymentMethod || "").toUpperCase())}</p>
+          <p class="rating-line muted">${o.role === "buyer" ? "Seller" : "Buyer"}: ${escapeHtml(other)}</p>
           ${statusBadge(o.status)}
         </div>`;
     }
@@ -127,10 +128,10 @@
       const withOrder = { ...c, kind: "conversation" };
       return `
         <div class="product order-card" onclick='openChat(${JSON.stringify(withOrder).replace(/'/g, "&apos;")})'>
-          <img src="${c.productImg}">
-          <h4>${c.productName}</h4>
-          <p>₹${c.price}</p>
-          <p class="rating-line muted">${c.role === "buyer" ? "Seller" : "Buyer inquiry"}: ${other}</p>
+          <img src="${safeImageSrc(c.productImg)}">
+          <h4>${escapeHtml(c.productName)}</h4>
+          <p>₹${Number(c.price) || 0}</p>
+          <p class="rating-line muted">${c.role === "buyer" ? "Seller" : "Buyer inquiry"}: ${escapeHtml(other)}</p>
           <span class="stock-badge in">💬 Chat</span>
         </div>`;
     }
@@ -209,7 +210,7 @@
       const box = document.getElementById("chatMessages");
       box.innerHTML = messages.length ? messages.map(m => `
         <div class="chat-bubble ${m.senderUid === me.uid ? 'mine' : ''}">
-          <span class="chat-sender">${m.senderUid === me.uid ? 'You' : m.senderName}</span>${m.text}
+          <span class="chat-sender">${m.senderUid === me.uid ? 'You' : escapeHtml(m.senderName)}</span>${escapeHtml(m.text)}
         </div>`).join("") : `<p class="rating-line muted" style="text-align:center;">Say hello 👋</p>`;
       box.scrollTop = box.scrollHeight;
     }
@@ -248,7 +249,7 @@
     async function submitOrderRating() {
       if (!window.selectedStars) { showToast("⚠ Please select a star rating"); return; }
       const comment = document.getElementById("ratingComment").value.trim();
-      await submitRating(activeOrder.productId, me.uid, window.selectedStars, comment);
+      await submitRating(activeOrder.productId, me.uid, window.selectedStars, comment, activeOrder.id);
       showToast("⭐ Thanks for rating!");
       closeChat();
     }

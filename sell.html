@@ -24,14 +24,14 @@
 <body>
   <div id="slowLoadBanner" style="display:none;position:fixed;top:0;left:0;right:0;background:#ffdd57;color:#332b00;padding:10px 14px;text-align:center;font-family:sans-serif;font-size:14px;z-index:99999;">⏳ Taking longer than usual to load (this happens on slow mobile data) — <a href="javascript:location.reload()" style="color:#332b00;font-weight:700;">Tap to reload</a></div>
   <div id="sellForm" class="page active">
-    <div class="logo"><img src="logo.png" alt="VNeeds Logo" class="logo-img" style="height:44px;"></div>
+    <div class="logo"><img src="logo.png" alt="VNeeds Logo" class="logo-img" style="height:64px;"></div>
     <h2 id="formTitle">Sell a Product</h2>
     <form onsubmit="event.preventDefault(); submitForm();">
       <label for="productName">Product Name</label><br>
       <input type="text" id="productName" placeholder="Product Name"><br>
 
       <label for="productPrice">Price (₹)</label><br>
-      <input type="number" id="productPrice" placeholder="Price (₹)"><br>
+      <input type="number" id="productPrice" placeholder="Price (₹)" min="1" step="1"><br>
 
       <label for="productCategory">Category</label><br>
       <select id="productCategory">
@@ -135,17 +135,31 @@
         return;
       }
 
+      const priceNum = parseInt(price, 10);
+      if (!Number.isFinite(priceNum) || priceNum <= 0) {
+        showToast("⚠ Please enter a valid price greater than ₹0");
+        return;
+      }
+      if (name.length > 100) {
+        showToast("⚠ Product name is too long (max 100 characters)");
+        return;
+      }
+      if (desc.length > 1000) {
+        showToast("⚠ Description is too long (max 1000 characters)");
+        return;
+      }
+
       await saveProfileField(me.uid, "block", block);
       await saveProfileField(me.uid, "upi", upi);
 
       try {
         if (editingId) {
-          const fields = { name, price: parseInt(price), category, desc, block, upi };
+          const fields = { name, price: priceNum, category, desc, block, upi };
           if (imgFile) fields.img = await resizeImage(imgFile, 500, 500, 0.5);
           await updateProduct(editingId, fields);
           showToast("✅ Product updated!");
         } else {
-          await addProduct({ name, price: parseInt(price), category, desc, imgFile, block, upi }, me);
+          await addProduct({ name, price: priceNum, category, desc, imgFile, block, upi }, me);
           showToast("✅ Product added successfully!");
         }
         setTimeout(() => window.location.href = "myproducts.html", 900);

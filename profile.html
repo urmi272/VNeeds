@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>window.__vneedsLoadTimer = setTimeout(function () {
+    var b = document.getElementById("slowLoadBanner");
+    if (b) b.style.display = "block";
+  }, 7000);</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - VNeeds</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="preload" href="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" as="script">
+  <link rel="preload" href="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js" as="script">
+  <link rel="preload" href="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js" as="script">
+  <link rel="preload" href="js/firebase-config.js" as="script">
+  <link rel="preload" href="js/ui.js" as="script">
+  <link rel="preload" href="js/auth.js" as="script">
+  <link rel="preload" href="js/products.js" as="script">
+</head>
+<body>
+  <div id="slowLoadBanner" style="display:none;position:fixed;top:0;left:0;right:0;background:#ffdd57;color:#332b00;padding:10px 14px;text-align:center;font-family:sans-serif;font-size:14px;z-index:99999;">⏳ Taking longer than usual to load (this happens on slow mobile data) — <a href="javascript:location.reload()" style="color:#332b00;font-weight:700;">Tap to reload</a></div>
+  <header>
+    <div class="logo"><img src="logo.png" alt="VNeeds Logo" class="logo-img"></div>
+    <div class="nav-actions">
+      <a href="buy.html"><button>⬅ Back</button></a>
+      <button class="icon-btn" onclick="doLogout()" title="Logout" aria-label="Logout">🚪</button>
+    </div>
+  </header>
+
+  <div id="sellForm" class="page active" style="max-width:520px;">
+    <div class="profile-avatar" id="profileAvatar">?</div>
+    <h2 id="formTitle" style="margin-top:6px;">My Profile</h2>
+    <p id="profileSince" class="rating-line muted" style="margin-bottom:18px;"></p>
+
+    <div style="text-align:left;">
+      <label>Name</label>
+      <input type="text" id="profileName" disabled>
+
+      <label>College Email</label>
+      <input type="text" id="profileEmail" disabled>
+
+      <label for="profileBlock">Your Block</label>
+      <select id="profileBlock">
+        <option value="">-- Select Block --</option>
+        <optgroup label="Girls">
+          <option value="Girls Block 1">Girls Block 1</option>
+          <option value="Girls Block 2">Girls Block 2</option>
+          <option value="Girls Special Block">Girls Special Block</option>
+        </optgroup>
+        <optgroup label="Boys">
+          <option value="Boys Block 1">Boys Block 1</option>
+          <option value="Boys Block 2">Boys Block 2</option>
+          <option value="Boys Block 3">Boys Block 3</option>
+          <option value="Boys Block 4">Boys Block 4</option>
+          <option value="Boys Block 5">Boys Block 5</option>
+          <option value="Boys Block 6">Boys Block 6</option>
+          <option value="Boys Block 7">Boys Block 7</option>
+          <option value="Boys Block 8">Boys Block 8</option>
+        </optgroup>
+      </select>
+
+      <label for="profileUpi">Your UPI ID</label>
+      <input type="text" id="profileUpi" placeholder="example@upi">
+    </div>
+
+    <div style="margin-top:18px; padding-top:16px; border-top:1px solid var(--border); display:flex; justify-content:center; gap:24px; text-align:center;">
+      <div>
+        <div style="font-size:20px; font-weight:800; color:var(--primary);" id="statListings">–</div>
+        <div class="rating-line muted" style="font-size:12px;">Active listings</div>
+      </div>
+      <div>
+        <div style="font-size:20px; font-weight:800; color:var(--primary);" id="statRating">–</div>
+        <div class="rating-line muted" style="font-size:12px;">Avg. seller rating</div>
+      </div>
+    </div>
+
+    <button type="button" id="saveProfileBtn" onclick="saveProfile()">💾 Save Changes</button>
+  </div>
+
+  <div id="toastContainer"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script>clearTimeout(window.__vneedsLoadTimer); var __b = document.getElementById("slowLoadBanner"); if (__b) __b.style.display = "none";</script>
+  <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/products.js"></script>
+
+  <script>
+    initDarkMode();
+    let me = null;
+
+    requireAuth(async (user, profile) => {
+      me = user;
+
+      document.getElementById("profileAvatar").innerText = (profile.name || user.email || "?").trim().charAt(0).toUpperCase();
+      document.getElementById("profileName").value = profile.name || user.displayName || "";
+      document.getElementById("profileEmail").value = profile.email || user.email || "";
+      document.getElementById("profileBlock").value = profile.block || "";
+      document.getElementById("profileUpi").value = profile.upi || "";
+
+      if (profile.createdAt && profile.createdAt.toDate) {
+        document.getElementById("profileSince").innerText =
+          "Member since " + profile.createdAt.toDate().toLocaleDateString(undefined, { year: "numeric", month: "long" });
+      }
+
+      try {
+        const mine = await fetchMyProducts(user.uid);
+        const active = mine.filter(p => p.status !== "out");
+        document.getElementById("statListings").innerText = active.length;
+
+        const rated = mine.filter(p => p.ratingCount);
+        if (rated.length) {
+          const avg = rated.reduce((sum, p) => sum + (p.avgRating || 0) * p.ratingCount, 0) /
+                      rated.reduce((sum, p) => sum + p.ratingCount, 0);
+          document.getElementById("statRating").innerText = "★ " + avg.toFixed(1);
+        } else {
+          document.getElementById("statRating").innerText = "No ratings yet";
+        }
+      } catch (err) {
+        console.error("Couldn't load listing stats:", err);
+      }
+    });
+
+    function doLogout() { logout().then(() => window.location.href = "index.html"); }
+
+    async function saveProfile() {
+      const block = document.getElementById("profileBlock").value;
+      const upi = document.getElementById("profileUpi").value.trim();
+      if (!block) { showToast("⚠ Please select your block"); return; }
+
+      const btn = document.getElementById("saveProfileBtn");
+      btn.disabled = true;
+      try {
+        await saveProfileField(me.uid, "block", block);
+        await saveProfileField(me.uid, "upi", upi);
+        showToast("✅ Profile updated");
+      } catch (err) {
+        console.error("Couldn't save profile:", err);
+        showToast("⚠ " + err.message);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

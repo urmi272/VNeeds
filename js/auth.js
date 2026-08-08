@@ -47,8 +47,6 @@ async function saveProfileField(uid, field, value) {
   localStorage.setItem("profileCache", JSON.stringify(cache));
 }
 
-// Redirect to login.html if nobody's signed in. Call at the top of every
-// protected page's script, inside auth.onAuthStateChanged.
 function requireAuth(onReady) {
   auth.onAuthStateChanged(async (user) => {
     if (!user) {

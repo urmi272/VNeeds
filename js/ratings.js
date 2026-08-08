@@ -1,6 +1,9 @@
 // ===== Ratings =====
 
-async function submitRating(productId, buyerUid, stars, comment) {
+// orderId is required (and checked server-side by the Firestore rules) so a
+// rating can only be left by someone who actually completed an order for this
+// exact product — otherwise anyone signed in could rate anything.
+async function submitRating(productId, buyerUid, stars, comment, orderId) {
   const productRef = db.collection("products").doc(productId);
   const ratingRef = productRef.collection("ratings").doc(buyerUid);
 
@@ -23,7 +26,7 @@ async function submitRating(productId, buyerUid, stars, comment) {
     }
 
     tx.set(ratingRef, {
-      stars, comment, buyerUid,
+      stars, comment, buyerUid, orderId,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     tx.set(productRef, { avgRating: total / count, ratingCount: count }, { merge: true });
