@@ -62,20 +62,6 @@ We ([@urmi272](https://github.com/urmi272) & [@anjalisevkani](https://github.com
 
 ---
 
-## 📸 Screenshots
-
-> _Screenshots coming soon._
-
-| Landing Page | Dashboard | Sell Form |
-|---|---|---|
-| _add screenshot_ | _add screenshot_ | _add screenshot_ |
-
-| Product Modal | Orders & Chat | Dark Mode |
-|---|---|---|
-| _add screenshot_ | _add screenshot_ | _add screenshot_ |
-
----
-
 ## 🏗️ Getting Started (run it yourself)
 
 ```bash
