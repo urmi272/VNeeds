@@ -9,6 +9,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Profile - VNeeds</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&display=swap">
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
@@ -23,10 +26,10 @@
 <body>
   <div id="slowLoadBanner" style="display:none;position:fixed;top:0;left:0;right:0;background:#ffdd57;color:#332b00;padding:10px 14px;text-align:center;font-family:sans-serif;font-size:14px;z-index:99999;">⏳ Taking longer than usual to load (this happens on slow mobile data) — <a href="javascript:location.reload()" style="color:#332b00;font-weight:700;">Tap to reload</a></div>
   <header>
-    <div class="logo"><img src="logo.png" alt="VNeeds Logo" class="logo-img"></div>
+    <div class="logo"><img src="logo-trim.png" alt="VNeeds Logo" class="logo-img"></div>
     <div class="nav-actions">
-      <a href="buy.html"><button>⬅ Back</button></a>
-      <button class="icon-btn" onclick="doLogout()" title="Logout" aria-label="Logout">🚪</button>
+      <a href="buy.html"><button>Back</button></a>
+      <button class="icon-btn" onclick="doLogout()" title="Logout" aria-label="Logout"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
     </div>
   </header>
 
@@ -77,7 +80,7 @@
       </div>
     </div>
 
-    <button type="button" id="saveProfileBtn" onclick="saveProfile()">💾 Save Changes</button>
+    <button type="button" id="saveProfileBtn" onclick="saveProfile()">Save Changes</button>
   </div>
 
   <div id="toastContainer"></div>
@@ -132,17 +135,17 @@
     async function saveProfile() {
       const block = document.getElementById("profileBlock").value;
       const upi = document.getElementById("profileUpi").value.trim();
-      if (!block) { showToast("⚠ Please select your block"); return; }
+      if (!block) { showToast("Please select your block"); return; }
 
       const btn = document.getElementById("saveProfileBtn");
       btn.disabled = true;
       try {
         await saveProfileField(me.uid, "block", block);
         await saveProfileField(me.uid, "upi", upi);
-        showToast("✅ Profile updated");
+        showToast("Profile updated");
       } catch (err) {
         console.error("Couldn't save profile:", err);
-        showToast("⚠ " + err.message);
+        showToast(err.message);
       } finally {
         btn.disabled = false;
       }

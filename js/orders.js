@@ -38,7 +38,7 @@ async function createOrder(product, buyer, paymentMethod) {
   });
 
   await pushNotification(product.sellerUid,
-    `📦 New order for "${product.name}" from ${buyerName}`, `orders.html`);
+    `New order for "${product.name}" from ${buyerName}`, `orders.html`);
   return orderRef.id;
 }
 
@@ -57,9 +57,9 @@ async function updateOrderStatus(orderId, status) {
   }
 
   const messages = {
-    confirmed: `✅ Your order for "${order.productName}" was confirmed by the seller`,
-    completed: `🎉 Order for "${order.productName}" marked complete — leave a rating!`,
-    cancelled: `❌ Order for "${order.productName}" was cancelled`
+    confirmed: `Your order for "${order.productName}" was confirmed by the seller`,
+    completed: `Order for "${order.productName}" marked complete — leave a rating!`,
+    cancelled: `Order for "${order.productName}" was cancelled`
   };
   if (messages[status]) {
     await pushNotification(order.buyerUid, messages[status], "orders.html");
@@ -88,7 +88,7 @@ async function sendMessage(orderId, sender, text, otherUid) {
     text,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
-  await pushNotification(otherUid, `💬 New message: "${text.slice(0, 40)}"`, "orders.html");
+  await pushNotification(otherUid, `New message: "${text.slice(0, 40)}"`, "orders.html");
 }
 
 function watchMessages(orderId, onChange) {

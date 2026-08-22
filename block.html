@@ -9,6 +9,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Select Block - VNeeds</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&display=swap">
   <!-- Preconnect + preload: fetch Firebase scripts in parallel instead of one-by-one, so slow/mobile connections don't stall on sequential downloads -->
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
@@ -23,27 +26,29 @@
 <body>
   <div id="slowLoadBanner" style="display:none;position:fixed;top:0;left:0;right:0;background:#ffdd57;color:#332b00;padding:10px 14px;text-align:center;font-family:sans-serif;font-size:14px;z-index:99999;">⏳ Taking longer than usual to load (this happens on slow mobile data) — <a href="javascript:location.reload()" style="color:#332b00;font-weight:700;">Tap to reload</a></div>
   <div class="page active auth-page">
-    <div class="logo"><img src="logo.png" alt="VNeeds Logo" class="logo-img" style="height:64px;"></div>
-    <h2>Select Your Block</h2>
-    <select id="blockSelect" class="block-select">
-      <option value="">-- Select Block --</option>
-      <optgroup label="Girls">
-        <option value="Girls Block 1">Girls Block 1</option>
-        <option value="Girls Block 2">Girls Block 2</option>
-        <option value="Girls Special Block">Girls Special Block</option>
-      </optgroup>
-      <optgroup label="Boys">
-        <option value="Boys Block 1">Boys Block 1</option>
-        <option value="Boys Block 2">Boys Block 2</option>
-        <option value="Boys Block 3">Boys Block 3</option>
-        <option value="Boys Block 4">Boys Block 4</option>
-        <option value="Boys Block 5">Boys Block 5</option>
-        <option value="Boys Block 6">Boys Block 6</option>
-        <option value="Boys Block 7">Boys Block 7</option>
-        <option value="Boys Block 8">Boys Block 8</option>
-      </optgroup>
-    </select><br><br>
-    <button onclick="saveBlock()">Continue</button>
+    <div class="logo"><img src="logo-trim.png" alt="VNeeds Logo" class="logo-img" style="height:30px;"></div>
+    <div class="auth-box">
+      <h2>Select Your Block</h2>
+      <select id="blockSelect" class="block-select">
+        <option value="">-- Select Block --</option>
+        <optgroup label="Girls">
+          <option value="Girls Block 1">Girls Block 1</option>
+          <option value="Girls Block 2">Girls Block 2</option>
+          <option value="Girls Special Block">Girls Special Block</option>
+        </optgroup>
+        <optgroup label="Boys">
+          <option value="Boys Block 1">Boys Block 1</option>
+          <option value="Boys Block 2">Boys Block 2</option>
+          <option value="Boys Block 3">Boys Block 3</option>
+          <option value="Boys Block 4">Boys Block 4</option>
+          <option value="Boys Block 5">Boys Block 5</option>
+          <option value="Boys Block 6">Boys Block 6</option>
+          <option value="Boys Block 7">Boys Block 7</option>
+          <option value="Boys Block 8">Boys Block 8</option>
+        </optgroup>
+      </select>
+      <button onclick="saveBlock()" style="width:100%; margin-top:18px; padding:12px; background:var(--brand); border-color:var(--brand); color:#fff;">Continue</button>
+    </div>
   </div>
 
   <div id="toastContainer"></div>
@@ -62,7 +67,7 @@
 
     async function saveBlock() {
       const block = document.getElementById("blockSelect").value;
-      if (!block) { showToast("⚠ Please select your block!"); return; }
+      if (!block) { showToast("Please select your block"); return; }
       await saveProfileField(uid, "block", block);
       window.location.href = "buy.html";
     }

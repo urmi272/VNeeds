@@ -9,6 +9,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Products - VNeeds</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&display=swap">
   <!-- Preconnect + preload: fetch Firebase scripts in parallel instead of one-by-one, so slow/mobile connections don't stall on sequential downloads -->
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
@@ -25,20 +28,20 @@
 <body>
   <div id="slowLoadBanner" style="display:none;position:fixed;top:0;left:0;right:0;background:#ffdd57;color:#332b00;padding:10px 14px;text-align:center;font-family:sans-serif;font-size:14px;z-index:99999;">⏳ Taking longer than usual to load (this happens on slow mobile data) — <a href="javascript:location.reload()" style="color:#332b00;font-weight:700;">Tap to reload</a></div>
   <header>
-    <div class="logo"><img src="logo.png" alt="VNeeds Logo" class="logo-img"></div>
+    <div class="logo"><img src="logo-trim.png" alt="VNeeds Logo" class="logo-img"></div>
     <div class="nav-actions">
-      <a href="buy.html"><button>⬅ Back</button></a>
-      <a href="profile.html"><button class="icon-btn" title="Profile" aria-label="Profile">👤</button></a>
-      <button class="icon-btn" onclick="doLogout()" title="Logout" aria-label="Logout">🚪</button>
+      <a href="buy.html"><button>Back</button></a>
+      <a href="profile.html"><button class="icon-btn" title="Profile" aria-label="Profile">Profile</button></a>
+      <button class="icon-btn" onclick="doLogout()" title="Logout" aria-label="Logout"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
     </div>
   </header>
 
   <h2 style="text-align:center;">My Products</h2>
   <p style="text-align:center; font-size:13px; color:var(--text-muted); margin:-8px 0 16px;">
-    Sold listings are automatically removed a week after the order is marked completed.
+    Sold items are removed automatically after 7 days.
   </p>
   <div style="text-align:center; margin-bottom:16px;">
-    <button onclick="addDemoProducts()" style="padding:10px 20px;border-radius:8px;border:none;background:var(--primary);color:#fff;font-weight:700;cursor:pointer;">🌱 Add Sample Products</button>
+    <button onclick="addDemoProducts()" style="padding:10px 20px;border-radius:8px;border:none;background:var(--primary);color:#fff;font-weight:700;cursor:pointer;">Add Sample Products</button>
   </div>
   <main id="myProductList"></main>
 
@@ -63,7 +66,7 @@
       showSkeletons(document.getElementById("myProductList"), 3);
       try {
         const removed = await cleanupOldCompletedProducts(user.uid);
-        if (removed) showToast(`🧹 Removed ${removed} listing${removed === 1 ? "" : "s"} completed over a week ago`);
+        if (removed) showToast(`Removed ${removed} listing${removed === 1 ? "" : "s"} completed over a week ago`);
       } catch (err) {
         console.error("Cleanup failed:", err);
       }
@@ -75,7 +78,7 @@
     async function loadMyProducts() {
       const container = document.getElementById("myProductList");
       const mine = await fetchMyProducts(me.uid);
-      if (!mine.length) { emptyState(container, "📦", "You have not added any products yet."); return; }
+      if (!mine.length) { emptyState(container, "", "You have not added any products yet."); return; }
 
       container.innerHTML = mine.map(p => `
         <div class="product">
@@ -83,10 +86,10 @@
           <h4>${escapeHtml(p.name)}</h4>
           <p>₹${Number(p.price) || 0}</p>
           ${p.ratingCount ? `<p class="rating-line">${starString(p.avgRating)} (${p.ratingCount})</p>` : `<p class="rating-line muted">No ratings yet</p>`}
-          <p class="stock-badge ${p.status === 'out' ? 'out' : 'in'}">${p.status === "out" ? "🚫 Out of Stock" : "✅ Available"}</p>
+          <p class="stock-badge ${p.status === 'out' ? 'out' : 'in'}">${p.status === "out" ? "Out of Stock" : "Available"}</p>
           <div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap; justify-content:center;">
-            <a href="sell.html?edit=${p.id}"><button>✏ Edit</button></a>
-            <button onclick="removeProduct('${p.id}')">🗑 Delete</button>
+            <a href="sell.html?edit=${p.id}"><button>Edit</button></a>
+            <button onclick="removeProduct('${p.id}')">Delete</button>
             <button onclick="flipStock('${p.id}', '${p.status}')">${p.status === "out" ? "Mark Available" : "Mark Out of Stock"}</button>
           </div>
         </div>
@@ -96,20 +99,20 @@
     async function removeProduct(id) {
       if (!confirm("Delete this product?")) return;
       await deleteProduct(id);
-      showToast("🗑 Product deleted");
+      showToast("Product deleted");
       loadMyProducts();
     }
 
     async function flipStock(id, status) {
       await updateProduct(id, { status: status === "out" ? "in" : "out" });
-      showToast("✔ Stock status updated");
+      showToast("Stock status updated");
       loadMyProducts();
     }
 
     async function addDemoProducts() {
       const profile = JSON.parse(localStorage.getItem("profileCache") || "{}");
       await seedDemoProducts(me, profile.block || "");
-      showToast("🌱 Sample products added!");
+      showToast("Sample products added");
       loadMyProducts();
     }
   </script>

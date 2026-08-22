@@ -60,7 +60,6 @@ We ([@urmi272](https://github.com/urmi272) & [@anjalisevkani](https://github.com
 | Payments | Cash on pickup + manual UPI (QR / deep link) |
 | Hosting | GitHub Pages |
 
----
 
 ## 🏗️ Getting Started (run it yourself)
 

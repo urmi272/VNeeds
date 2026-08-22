@@ -9,6 +9,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VNeeds - Buy</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&display=swap">
   <!-- Preconnect + preload: fetch Firebase scripts in parallel instead of one-by-one, so slow/mobile connections don't stall on sequential downloads -->
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
@@ -28,49 +31,39 @@
 </head>
 <body>
   <div id="slowLoadBanner" style="display:none;position:fixed;top:0;left:0;right:0;background:#ffdd57;color:#332b00;padding:10px 14px;text-align:center;font-family:sans-serif;font-size:14px;z-index:99999;">⏳ Taking longer than usual to load (this happens on slow mobile data) — <a href="javascript:location.reload()" style="color:#332b00;font-weight:700;">Tap to reload</a></div>
+  <header id="mainHeader">
+    <button class="mobile-toggle" onclick="toggleSidebar()" aria-label="Open menu">☰</button>
+    <div class="logo"><img src="logo-trim.png" alt="VNeeds Logo" class="logo-img"></div>
+
+    <div class="search-container">
+      <input type="text" id="search" placeholder="Search products..." onkeyup="filterProducts()">
+    </div>
+
+    <div class="nav-actions">
+      <a class="nav-full-link" href="sell.html" title="Sell an item"><button class="btn-primary">Sell</button></a>
+      <a class="nav-full-link" href="myproducts.html" title="My Products"><button>My Products</button></a>
+      <a class="nav-full-link" href="orders.html" title="Orders"><button>Orders</button></a>
+      <button class="icon-btn" onclick="showPage('wishlistPage')" title="Wishlist" aria-label="Wishlist"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.9a5.5 5.5 0 0 0-7.8 0L12 5.9l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21.2l7.8-7.5 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+      <a class="nav-full-link" href="profile.html" title="Profile"><button class="icon-btn">Profile</button></a>
+
+      <div class="notif-wrap">
+        <button id="notifBell" class="icon-btn" title="Notifications" aria-label="Notifications"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span id="notifBadge" class="notif-badge"></span></button>
+        <div id="notifDropdown" class="notif-dropdown"></div>
+      </div>
+
+      <button id="darkToggle" class="icon-btn" title="Toggle dark mode" aria-label="Toggle dark mode"></button>
+      <button class="icon-btn" onclick="doLogout()" title="Logout" aria-label="Logout"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+    </div>
+  </header>
+
   <div id="dashboard" class="page active">
-    <header>
-      <button class="mobile-toggle" onclick="toggleSidebar()" aria-label="Open menu">☰</button>
-      <div class="logo"><img src="logo.png" alt="VNeeds Logo" class="logo-img"></div>
-
-      <div class="search-container">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="search" placeholder="Search products..." onkeyup="filterProducts()">
-      </div>
-
-      <div class="nav-actions">
-        <a class="nav-full-link" href="sell.html" title="Sell an item"><button class="btn-primary">➕<span class="nav-label">Sell</span></button></a>
-        <a class="nav-full-link" href="myproducts.html" title="My Products"><button>📦<span class="nav-label">My Products</span></button></a>
-        <a class="nav-full-link" href="orders.html" title="Orders"><button>🧾<span class="nav-label">Orders</span></button></a>
-        <button class="icon-btn" onclick="showPage('wishlistPage')" title="Wishlist" aria-label="Wishlist">❤️</button>
-        <a class="nav-full-link" href="profile.html" title="Profile"><button class="icon-btn">👤<span class="nav-label">Profile</span></button></a>
-
-        <div class="notif-wrap">
-          <button id="notifBell" class="icon-btn" title="Notifications" aria-label="Notifications">🔔<span id="notifBadge" class="notif-badge"></span></button>
-          <div id="notifDropdown" class="notif-dropdown"></div>
-        </div>
-
-        <button id="darkToggle" class="icon-btn" title="Toggle dark mode" aria-label="Toggle dark mode">🌙</button>
-        <button class="icon-btn" onclick="doLogout()" title="Logout" aria-label="Logout">🚪</button>
-      </div>
-    </header>
-
     <aside>
       <nav class="mobile-quick-nav">
-        <a href="sell.html">➕ Sell an item</a>
-        <a href="myproducts.html">📦 My Products</a>
-        <a href="orders.html">🧾 Orders</a>
-        <a href="profile.html">👤 Profile</a>
+        <a href="sell.html">Sell an item</a>
+        <a href="myproducts.html">My Products</a>
+        <a href="orders.html">Orders</a>
+        <a href="profile.html">Profile</a>
       </nav>
-      <div class="filter-section">
-        <h3 onclick="toggleSection(this)">Categories <span class="chevron">▾</span></h3>
-        <ul>
-          <li onclick="filterCategory('all')">All</li>
-          <li onclick="filterCategory('food')">🍜 Food</li>
-          <li onclick="filterCategory('clothes')">👕 Clothes</li>
-          <li onclick="filterCategory('cosmetics')">💄 Cosmetics</li>
-        </ul>
-      </div>
       <div class="filter-section">
         <h3 onclick="toggleSection(this)">Your Block <span class="chevron">▾</span></h3>
         <ul id="blockCategory"></ul>
@@ -79,15 +72,30 @@
 
     <div id="sidebarOverlay" onclick="closeSidebar()"></div>
 
+    <div class="chip-rail" id="chipRail">
+      <button class="chip active" onclick="setCategoryChip('all', this)">All</button>
+      <button class="chip" onclick="setCategoryChip('food', this)">Food</button>
+      <button class="chip" onclick="setCategoryChip('clothes', this)">Clothes</button>
+      <button class="chip" onclick="setCategoryChip('cosmetics', this)">Cosmetics</button>
+      <button class="chip" onclick="setCategoryChip('books', this)">Books &amp; Notes</button>
+      <button class="chip" onclick="setCategoryChip('electronics', this)">Electronics</button>
+      <button class="chip" onclick="setCategoryChip('furniture', this)">Furniture</button>
+      <button class="chip" onclick="setCategoryChip('cycles', this)">Cycles</button>
+      <button class="chip" onclick="setCategoryChip('hostel', this)">Hostel Essentials</button>
+      <button class="chip" onclick="setCategoryChip('other', this)">Other</button>
+    </div>
+
     <main id="productList"></main>
+
+    <a href="sell.html" class="mobile-fab" aria-label="Sell an item">Sell</a>
   </div>
 
   <div id="wishlistPage" class="page">
     <header>
-      <div class="logo"><img src="logo.png" alt="VNeeds Logo" class="logo-img"></div>
-      <div class="nav-actions"><button onclick="showPage('dashboard')">⬅ Back</button></div>
+      <div class="logo"><img src="logo-trim.png" alt="VNeeds Logo" class="logo-img"></div>
+      <div class="nav-actions"><button onclick="showPage('dashboard')">Back</button></div>
     </header>
-    <h2 style="text-align:center;">Your Wishlist ❤️</h2>
+    <h2 style="text-align:center;">Your Wishlist</h2>
     <div id="wishlistList" class="wishlist-container"></div>
   </div>
 
@@ -103,12 +111,12 @@
       <p id="modalSeller"></p>
       <p id="modalUpi"></p>
 
-      <button id="chatSellerBtn" class="chat-cta" onclick="openProductChat()">💬 Chat with Seller</button>
+      <button id="chatSellerBtn" class="chat-cta" onclick="openProductChat()">Chat with Seller</button>
 
       <div class="payment-options-label">Choose a payment method</div>
       <div class="payment-options">
-        <button id="cashBtn">💵 Cash Payment</button>
-        <button id="upiBtn">📲 Pay withUPI</button>
+        <button id="cashBtn">Cash Payment</button>
+        <button id="upiBtn">Pay with UPI</button>
       </div>
       <a id="upiDeepLink" href="#" rel="noopener noreferrer" style="display:none">Open UPI</a>
       <div id="upiChooser" style="display:none; margin-top:10px; font-size:14px;">
@@ -123,8 +131,8 @@
       </div>
 
       <div class="modal-nav">
-        <button id="prevBtn">⬅ Prev</button>
-        <button id="nextBtn">Next ➡</button>
+        <button id="prevBtn">Prev</button>
+        <button id="nextBtn">Next</button>
       </div>
     </div>
   </div>
@@ -172,10 +180,10 @@
 
       if (profile.block) {
         document.getElementById("blockCategory").innerHTML =
-          `<li onclick="filterByBlock('${profile.block.replace(/'/g, "\\'")}')">🏢 ${escapeHtml(profile.block)}</li>`;
+          `<li onclick="filterByBlock('${profile.block.replace(/'/g, "\\'")}')">${escapeHtml(profile.block)}</li>`;
       } else {
         document.getElementById("blockCategory").innerHTML =
-          `<li class="muted-item"><a href="block.html">📍 Set your block</a></li>`;
+          `<li class="muted-item"><a href="block.html">Set your block</a></li>`;
       }
 
       try {
@@ -197,6 +205,18 @@
       header.parentElement.classList.toggle("collapsed");
     }
 
+    const CATEGORY_LABELS = {
+      food: "Food", clothes: "Clothes", cosmetics: "Cosmetics",
+      books: "Books & Notes", electronics: "Electronics", furniture: "Furniture",
+      cycles: "Cycles", hostel: "Hostel Essentials", other: "Other"
+    };
+
+    function setCategoryChip(cat, el) {
+      document.querySelectorAll("#chipRail .chip").forEach(c => c.classList.remove("active"));
+      el.classList.add("active");
+      filterCategory(cat);
+    }
+
     function showPage(id) {
       document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
       document.getElementById(id).classList.add("active");
@@ -210,15 +230,17 @@
 
     function productCardHTML(p, i) {
       const isWishlisted = wishlist.includes(p.id);
+      const catLabel = CATEGORY_LABELS[p.category] || p.category || "";
       return `
         <div class="product" style="animation-delay:${i * 0.05}s" onclick='openModal(${JSON.stringify(p).replace(/'/g, "&apos;")})'>
           ${isNew(p) ? `<span class="new-badge">New</span>` : ""}
           <img src="${safeImageSrc(p.img)}" loading="lazy">
           <h4>${escapeHtml(p.name)}</h4>
           <p>₹${Number(p.price) || 0}</p>
+          <p class="rating-line muted" style="color:var(--muted);">${escapeHtml(catLabel)}${p.block ? " · " + escapeHtml(p.block) : ""}</p>
           ${p.ratingCount ? `<p class="rating-line">${starString(p.avgRating)} (${p.ratingCount})</p>` : `<p class="rating-line muted">No ratings yet</p>`}
-          ${p.status === "out" ? `<p class="stock-badge out">🚫 Out of Stock</p>` : `<p class="stock-badge in">✅ Available</p>`}
-          <span class="wishlist ${isWishlisted ? 'active' : ''}" onclick="handleWishlistClick(event, '${p.id}', this)">♥</span>
+          ${p.status === "out" ? `<p class="stock-badge out">Out of Stock</p>` : `<p class="stock-badge in">Available</p>`}
+          <span class="wishlist ${isWishlisted ? 'active' : ''}" onclick="handleWishlistClick(event, '${p.id}', this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.9a5.5 5.5 0 0 0-7.8 0L12 5.9l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21.2l7.8-7.5 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
         </div>`;
     }
 
@@ -252,11 +274,11 @@
       if (list.length === 0) {
         container.innerHTML = toolbar;
         const empty = document.createElement("div");
-        emptyState(empty, "🔍", allProducts.length === 0
+        emptyState(empty, "", allProducts.length === 0
           ? `No products in the marketplace yet.`
           : `No products found`);
         if (allProducts.length === 0) {
-          empty.innerHTML += `<button onclick="addDemoProducts()" style="margin-top:10px;padding:10px 20px;border-radius:8px;border:none;background:var(--primary);color:#fff;font-weight:700;cursor:pointer;">🌱 Add Sample Products</button>`;
+          empty.innerHTML += `<button onclick="addDemoProducts()" style="margin-top:10px;padding:10px 20px;border-radius:8px;border:none;background:var(--primary);color:#fff;font-weight:700;cursor:pointer;">Add Sample Products</button>`;
         }
         container.appendChild(empty);
         return;
@@ -266,7 +288,7 @@
 
     async function addDemoProducts() {
       await seedDemoProducts(me, myProfile.block || "");
-      showToast("🌱 Sample products added!");
+      showToast("Sample products added");
     }
 
     async function handleWishlistClick(e, id, el) {
@@ -278,7 +300,7 @@
         showToast(nowActive ? "Added to wishlist" : "Removed from wishlist");
       } catch (err) {
         console.error("Wishlist error:", err);
-        showToast("⚠ Couldn't update wishlist: " + err.message);
+        showToast("Couldn't update wishlist: " + err.message);
       }
     }
 
@@ -286,7 +308,7 @@
       const container = document.getElementById("wishlistList");
       const items = allProducts.filter(p => wishlist.includes(p.id));
       currentProductList = items;
-      if (!items.length) { emptyState(container, "✨", "No items yet. Start exploring products!"); return; }
+      if (!items.length) { emptyState(container, "", "No items yet. Start exploring products!"); return; }
       container.innerHTML = items.map(productCardHTML).join("");
     }
 
@@ -311,7 +333,7 @@
       document.getElementById("modalName").innerText = p.name;
       document.getElementById("modalRating").innerText = p.ratingCount ? `${starString(p.avgRating)} (${p.ratingCount} ratings)` : "No ratings yet";
       document.getElementById("modalPrice").innerText = "₹" + p.price;
-      document.getElementById("modalDesc").innerHTML = `${escapeHtml(p.desc)}<br><strong>Status:</strong> ${p.status === "out" ? "🚫 Out of Stock" : "✅ Available"}`;
+      document.getElementById("modalDesc").innerHTML = `${escapeHtml(p.desc)}<br><strong>Status:</strong> ${p.status === "out" ? "Out of Stock" : "Available"}`;
       document.getElementById("modalSeller").innerText = "Seller: " + p.sellerName + (p.block ? " | Block: " + p.block : "");
       document.getElementById("modalUpi").innerText = "UPI ID: " + (p.upi || "Not provided");
 
@@ -321,7 +343,7 @@
       const cashBtn = document.getElementById("cashBtn"), upiBtn = document.getElementById("upiBtn");
       const disabled = p.status === "out" || isMine;
       [cashBtn, upiBtn].forEach(b => b.disabled = disabled);
-      cashBtn.innerText = isMine ? "This is your listing" : (p.status === "out" ? "🚫 Out of Stock" : "💵 Cash Payment");
+      cashBtn.innerText = isMine ? "This is your listing" : (p.status === "out" ? "Out of Stock" : "Cash Payment");
       upiBtn.style.display = isMine || p.status === "out" ? "none" : "inline-block";
 
       cashBtn.onclick = () => placeOrder(p, "cash");
@@ -337,7 +359,7 @@
         await createOrder(p, me, method);
       } catch (err) {
         console.error("Couldn't place order:", err);
-        showToast("⚠ " + err.message);
+        showToast(err.message);
         closeModal();
         return;
       }
@@ -350,7 +372,7 @@
         document.getElementById("phonepeLink").href = `intent://pay?${q}#Intent;scheme=upi;package=com.phonepe.app;end`;
         document.getElementById("paytmLink").href = `intent://pay?${q}#Intent;scheme=upi;package=net.one97.paytm;end`;
         document.getElementById("copyUpiBtn").onclick = async () => {
-          try { await navigator.clipboard.writeText(p.upi); showToast("📋 UPI ID copied"); }
+          try { await navigator.clipboard.writeText(p.upi); showToast("UPI ID copied"); }
           catch { prompt("Copy this UPI ID:", p.upi); }
         };
         const qr = document.getElementById("upiQr");
@@ -358,9 +380,9 @@
         qr.style.display = "block";
         document.getElementById("upiChooser").style.display = "block";
       } else {
-        showToast("💵 Pay in cash when you meet the seller.");
+        showToast("Pay in cash when you meet the seller.");
       }
-      showToast("🧾 Order placed! Track it in Orders.");
+      showToast("Order placed! Track it in Orders.");
     }
 
     function closeModal() {
@@ -370,11 +392,11 @@
     }
     function nextProduct() {
       if (currentProductIndex < currentProductList.length - 1) openModal(currentProductList[++currentProductIndex]);
-      else showToast("🚫 No more products");
+      else showToast("No more products");
     }
     function prevProduct() {
       if (currentProductIndex > 0) openModal(currentProductList[--currentProductIndex]);
-      else showToast("🚫 Already at first product");
+      else showToast("Already at first product");
     }
 
     // ----- Pre-purchase chat -----
@@ -391,14 +413,14 @@
         if (unsubProductChat) unsubProductChat();
         unsubProductChat = watchConvMessages(conv.id, renderProductChatMessages, (err) => {
           console.error("Chat listener error:", err);
-          showToast("⚠ Couldn't load messages: " + err.message);
+          showToast("Couldn't load messages: " + err.message);
         });
 
         document.getElementById("productChatModal").style.display = "flex";
         document.getElementById("productChatModal").setAttribute("aria-hidden", "false");
       } catch (err) {
         console.error("Couldn't open chat:", err);
-        showToast("⚠ Couldn't start chat: " + err.message);
+        showToast("Couldn't start chat: " + err.message);
       }
     }
 
@@ -407,7 +429,7 @@
       box.innerHTML = messages.length ? messages.map(m => `
         <div class="chat-bubble ${m.senderUid === me.uid ? 'mine' : ''}">
           <span class="chat-sender">${m.senderUid === me.uid ? 'You' : escapeHtml(m.senderName)}</span>${escapeHtml(m.text)}
-        </div>`).join("") : `<p class="rating-line muted" style="text-align:center;">Ask about size, condition, pickup time, or anything else 👋</p>`;
+        </div>`).join("") : `<p class="rating-line muted" style="text-align:center;">Ask about size, condition, or pickup time</p>`;
       box.scrollTop = box.scrollHeight;
     }
 
@@ -421,7 +443,7 @@
         input.value = "";
       } catch (err) {
         console.error("Couldn't send message:", err);
-        showToast("⚠ Message didn't send: " + err.message);
+        showToast("Message didn't send: " + err.message);
       }
     }
 

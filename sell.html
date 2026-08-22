@@ -9,6 +9,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VNeeds - Sell</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&display=swap">
   <!-- Preconnect + preload: fetch Firebase scripts in parallel instead of one-by-one, so slow/mobile connections don't stall on sequential downloads -->
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
@@ -24,28 +27,37 @@
 <body>
   <div id="slowLoadBanner" style="display:none;position:fixed;top:0;left:0;right:0;background:#ffdd57;color:#332b00;padding:10px 14px;text-align:center;font-family:sans-serif;font-size:14px;z-index:99999;">⏳ Taking longer than usual to load (this happens on slow mobile data) — <a href="javascript:location.reload()" style="color:#332b00;font-weight:700;">Tap to reload</a></div>
   <div id="sellForm" class="page active">
-    <div class="logo"><img src="logo.png" alt="VNeeds Logo" class="logo-img" style="height:64px;"></div>
+    <div class="logo"><img src="logo-trim.png" alt="VNeeds Logo" class="logo-img" style="height:40px; margin-bottom:6px;"></div>
     <h2 id="formTitle">Sell a Product</h2>
     <form onsubmit="event.preventDefault(); submitForm();">
-      <label for="productName">Product Name</label><br>
-      <input type="text" id="productName" placeholder="Product Name"><br>
+      <div class="form-section-title">Photo</div>
+      <label for="productImage">Upload a clear photo</label><br>
+      <input type="file" id="productImage" accept="image/*" onchange="previewImage(event)"><br>
+      <img id="imagePreview" style="display:none; max-width:200px; margin:10px auto; border-radius:10px;"><br>
 
-      <label for="productPrice">Price (₹)</label><br>
-      <input type="number" id="productPrice" placeholder="Price (₹)" min="1" step="1"><br>
+      <div class="form-section-title">Details</div>
+      <label for="productName">Product Name</label><br>
+      <input type="text" id="productName" placeholder="e.g. Study lamp, barely used"><br>
 
       <label for="productCategory">Category</label><br>
       <select id="productCategory">
         <option value="food">Food</option>
         <option value="clothes">Clothes</option>
         <option value="cosmetics">Cosmetics</option>
+        <option value="books">Books &amp; Notes</option>
+        <option value="electronics">Electronics</option>
+        <option value="furniture">Furniture</option>
+        <option value="cycles">Cycles</option>
+        <option value="hostel">Hostel Essentials</option>
+        <option value="other">Other</option>
       </select><br>
 
       <label for="productDescription">Description</label><br>
-      <textarea id="productDescription" placeholder="Product Description"></textarea><br>
+      <textarea id="productDescription" placeholder="Condition, why you're selling, anything a buyer should know"></textarea><br>
 
-      <label for="productImage">Upload Image</label><br>
-      <input type="file" id="productImage" accept="image/*" onchange="previewImage(event)"><br>
-      <img id="imagePreview" style="display:none; max-width:200px; margin:10px auto; border-radius:8px;"><br>
+      <div class="form-section-title">Price &amp; Pickup</div>
+      <label for="productPrice">Price (₹)</label><br>
+      <input type="number" id="productPrice" placeholder="0" min="1" step="1"><br>
 
       <label for="sellerBlock">Your Block</label><br>
       <select id="sellerBlock">
@@ -67,11 +79,12 @@
         </optgroup>
       </select><br>
 
+      <div class="form-section-title">Payment</div>
       <label for="sellerUpi">Your UPI ID</label><br>
       <input type="text" id="sellerUpi" placeholder="example@upi"><br>
 
-      <button type="submit" id="submitBtn">Add Product</button>
-      <a href="buy.html"><button type="button">Cancel</button></a>
+      <button type="submit" id="submitBtn" class="btn-primary" style="width:100%; margin-top:22px; padding:13px;">Publish Listing</button>
+      <a href="buy.html"><button type="button" style="width:100%; margin-top:8px;">Cancel</button></a>
     </form>
   </div>
 
@@ -131,21 +144,21 @@
       const upi = document.getElementById("sellerUpi").value.trim();
 
       if (!name || !price || !category || !desc || !block || !upi || (!imgFile && !existingImg)) {
-        showToast("⚠ Please fill all fields, select an image, block, and enter UPI ID");
+        showToast("Please fill all fields, select an image, block, and enter UPI ID");
         return;
       }
 
       const priceNum = parseInt(price, 10);
       if (!Number.isFinite(priceNum) || priceNum <= 0) {
-        showToast("⚠ Please enter a valid price greater than ₹0");
+        showToast("Please enter a valid price greater than ₹0");
         return;
       }
       if (name.length > 100) {
-        showToast("⚠ Product name is too long (max 100 characters)");
+        showToast("Product name is too long (max 100 characters)");
         return;
       }
       if (desc.length > 1000) {
-        showToast("⚠ Description is too long (max 1000 characters)");
+        showToast("Description is too long (max 1000 characters)");
         return;
       }
 
@@ -157,14 +170,14 @@
           const fields = { name, price: priceNum, category, desc, block, upi };
           if (imgFile) fields.img = await resizeImage(imgFile, 500, 500, 0.5);
           await updateProduct(editingId, fields);
-          showToast("✅ Product updated!");
+          showToast("Product updated");
         } else {
           await addProduct({ name, price: priceNum, category, desc, imgFile, block, upi }, me);
-          showToast("✅ Product added successfully!");
+          showToast("Product added");
         }
         setTimeout(() => window.location.href = "myproducts.html", 900);
       } catch (err) {
-        showToast("⚠ " + err.message);
+        showToast(err.message);
       }
     }
   </script>

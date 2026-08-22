@@ -9,6 +9,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VNeeds</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&display=swap">
   <!-- Preconnect + preload: fetch Firebase scripts in parallel instead of one-by-one, so slow/mobile connections don't stall on sequential downloads -->
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
@@ -17,35 +20,35 @@
   <link rel="preload" href="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js" as="script">
   <link rel="preload" href="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js" as="script">
   <link rel="preload" href="js/firebase-config.js" as="script">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
   <div id="slowLoadBanner" style="display:none;position:fixed;top:0;left:0;right:0;background:#ffdd57;color:#332b00;padding:10px 14px;text-align:center;font-family:sans-serif;font-size:14px;z-index:99999;">⏳ Taking longer than usual to load (this happens on slow mobile data) — <a href="javascript:location.reload()" style="color:#332b00;font-weight:700;">Tap to reload</a></div>
   <div id="landing" class="page active">
     <div class="landing-card">
-      <img src="logo.png" alt="VNeeds Logo" class="logo-img">
+      <div class="landing-top-accent"></div>
+      <img src="logo-trim.png" alt="VNeeds Logo" class="logo-img">
+      <span class="eyebrow">Student Marketplace</span>
       <h1>Turn hostel needs into quick deals</h1>
-      <p class="tagline">Buy and sell with students in your own block — anytime, anywhere.</p>
 
       <div class="action-tiles">
         <button class="action-tile buy" onclick="goBuy()">
-          <span class="tile-icon">🛍️</span>
+          <svg class="tile-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
           <span class="tile-title">Buy</span>
-          <span class="tile-sub">Browse what's available near you</span>
+          <span class="tile-sub">Browse listings</span>
+          <span class="tile-arrow">→</span>
         </button>
         <button class="action-tile sell" onclick="goSell()">
-          <span class="tile-icon">🏷️</span>
+          <svg class="tile-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 12.6 12.6 20.6a2 2 0 0 1-2.8 0l-7.4-7.4V3h10.2l7.4 7.4a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.2" fill="currentColor" stroke="none"/></svg>
           <span class="tile-title">Sell</span>
-          <span class="tile-sub">List an item in under a minute</span>
+          <span class="tile-sub">List an item</span>
+          <span class="tile-arrow">→</span>
         </button>
       </div>
 
       <div class="trust-strip">
-        <span>🏢 Block-based discovery</span>
-        <span>💬 Chat with sellers</span>
-        <span>💵 Cash or UPI</span>
+        <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Buy  by block</span>
+        <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Chat with sellers</span>
+        <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Cash or UPI</span>
       </div>
     </div>
   </div>

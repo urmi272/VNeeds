@@ -45,7 +45,7 @@ async function sendConvMessage(conversationId, sender, text, otherUid, productNa
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
   await pushNotification(otherUid,
-    `💬 New message about "${productName}": "${text.slice(0, 40)}"`, "orders.html");
+    `New message about "${productName}": "${text.slice(0, 40)}"`, "orders.html");
 }
 
 function watchConvMessages(conversationId, onChange) {
